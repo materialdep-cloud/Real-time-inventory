@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倉庫庫存查詢系統</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+            --danger-color: #e53e3e;
+            --danger-hover: #c53030;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Microsoft JhengHei";
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (min-width: 768px) {
+            .control-panel {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        select, input {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: var(--text-color);
+            width: 100%;
+            height: 44px; /* 統一高度，方便觸控 */
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        .btn-clear {
+            width: 100%;
+            height: 44px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-clear:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 15px;
+            table-layout: fixed; /* 電腦端平均分配欄位寬度 */
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 14px 16px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* 平均分配電腦端的寬度 */
+        th:nth-child(1), td:nth-child(1) { width: 15%; } /* 品類 */
+        th:nth-child(2), td:nth-child(2) { width: 15%; } /* 品項代號 */
+        th:nth-child(3), td:nth-child(3) { width: 28%; } /* 品名 */
+        th:nth-child(4), td:nth-child(4) { width: 12%; } /* 庫存單位 */
+        th:nth-child(5), td:nth-child(5) { width: 30%; } /* 庫存與其他倉 */
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+        }
+
+        /* 庫存顯示容器 */
+        .stock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .main-stock {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        /* 精緻庫存標籤網格 */
+        .stock-badges-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: flex-end;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        /* 一廠專屬藍色標籤 */
+        .stock-badge-pill-f1 {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        /* 二廠專屬綠色標籤 */
+        .stock-badge-pill-f2 {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #f0fff4;
+            color: #22543d;
+            border: 1px solid #c6f6d5;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .no-other-stock {
+            font-size: 11px;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #718096;
+        }
+
+        .loading {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .error {
+            color: #e53e3e;
+            background: #fff5f5;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #fed7d7;
+        }
+
+        /* 手機版 RWD 優化：寬度小於 768px 時轉換為卡片式排列 */
+        @media (max-width: 767px) {
+            .table-container {
+                border: none;
+            }
+            
+            table {
+                display: block;
+                table-layout: auto;
+            }
+
+            thead {
+                display: none; /* 隱藏傳統表頭 */
+            }
+
+            tbody {
+                display: block;
+                width: 100%;
+            }
+
+            tr {
+                display: block;
+                background: #ffffff;
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 15px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            }
+
+            tr:nth-child(even) {
+                background-color: #ffffff;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border-bottom: 1px dashed #edf2f7;
+                width: 100% !important; /* 蓋掉電腦端的固定百分比 */
+                text-align: right;
+                font-size: 14px;
+            }
+
+            td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+                margin-top: 5px;
+                align-items: flex-start; /* 手機端庫存標籤向下排列對齊 */
+            }
+
+            /* 動態注入標籤說明 */
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: var(--primary-color);
+                text-align: left;
+                padding-right: 15px;
+                flex-shrink: 0;
+            }
+
+            .stock-container {
+                align-items: flex-end;
+                width: 100%;
+            }
+
+            .stock-badges-grid {
+                justify-content: flex-end;
+                margin-top: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>即時倉庫庫存查詢系統</h1>
+        <div class="subtitle">資料來源：Google Sheets 雲端試算表</div>
+    </header>
+
+    <div id="status" class="status-message loading">正在從 Google Sheets 載入最新庫存資料...</div>
+
+    <div id="main-content" style="display: none;">
+        <!-- 四欄控制選單 -->
+        <div class="control-panel">
+            <div class="form-group">
+                <label for="factory-select">1. 選擇廠別：</label>
+                <select id="factory-select">
+                    <option value="">-- 全部廠別 --</option>
+                    <option value="factory1">一廠</option>
+                    <option value="factory2">二廠</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="warehouse-select">2. 選擇主查詢倉庫：</label>
+                <select id="warehouse-select">
+                    <!-- 動態載入選單內容 -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="category-select">3. 選擇品類 (A欄)：</label>
+                <select id="category-select">
+                    <option value="ALL">-- 全部品類 --</option>
+                    <!-- 動態載入品類選項 -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="search-input">4. 關鍵字快速搜尋：</label>
+                <input type="text" id="search-input" placeholder="輸入代號、品名或單位搜尋...">
+            </div>
+        </div>
+
+        <!-- 輔助按鈕：全部清空 -->
+        <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+            <div style="width: 100%; max-width: 180px;">
+                <button type="button" id="btn-clear-all" class="btn-clear">
+                    <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    全部清空
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="stock-table">
+                <thead>
+                    <tr id="table-header">
+                        <th>品類</th>
+                        <th>品項代號</th>
+                        <th>品名</th>
+                        <th>庫存單位</th>
+                        <th style="text-align: right;">當前庫存 / 其他倉庫</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- 動態產生表格內容 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 您的 Google Sheet CSV 連結
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqhij3tYIKCP5YwznxO0uCrthJDE09xE8pOG76mejZDrH6xFyPRndBKnx9UBwQmnxxyvcE9vUUZJqk/pub?gid=322034433&single=true&output=csv";
+
+    let rawData = [];               // 原始資料物件陣列
+    let headers = [];               // 欄位標題
+    
+    // 固定欄位索引
+    const colNameCategory = 0;      // A 欄 -> 品類
+    const colNameProductCode = 1;   // B 欄 -> 品項代號
+    const colNameProductName = 2;   // C 欄 -> 品名
+    const colNameUnit = 3;          // D 欄 -> 庫存單位
+    const colNameWarehouse = 4;     // E 欄 -> 倉庫
+    let colNameQty = -1;            // 庫存數量
+
+    // 廠別倉庫順序定義 (一廠鎖定 63-7倉)
+    const factoryWarehouseMap = {
+        factory1: [
+            "63-7倉",
+            "63-6倉/上層",
+            "63-5倉/常溫料架區",
+            "車棚1倉/包材倉",
+            "車棚2倉/久儲包材倉",
+            "63-5倉/低溫倉",
+            "63-6倉/下層/理貨倉"
+        ],
+        factory2: [
+            "綠園二廠/總倉",
+            "綠園二廠/包材倉",
+            "綠園二廠/待處理倉",
+            "綠園二廠/常溫區",
+            "包裝/原料倉",
+            "包裝/成品倉",
+            "包裝/成品二倉"
+        ]
+    };
+
+    // 建立倉庫名稱與其權重、廠別對應字典，以便後續進行精準分廠排序
+    const whOrderMap = {};
+    factoryWarehouseMap.factory1.forEach((name, index) => {
+        whOrderMap[name] = { factory: 'factory1', score: index };
+    });
+    factoryWarehouseMap.factory2.forEach((name, index) => {
+        whOrderMap[name] = { factory: 'factory2', score: index };
+    });
+
+    // 品類樹狀目錄定義
+    const categoryOrderMap = {};
+    const categoryTree = [
+        "菇類",
+        "香菇", "杏鮑菇", "木耳", "銀耳", "金針", "鴻喜雪白", "秀珍", "洋菇", "雜菇", "綜合菇", "乾香菇",
+        "蔬菜類",
+        "芽菜", "瓜菜", "根菜", "莖菜", "葉菜", "包葉菜", "花菜", "果菜", "豆菜", "生菜",
+        "雜糧特用類",
+        "雜糧特用",
+        "水果類",
+        "水果",
+        "其他農產類",
+        "花草", "蜂類", "藻類", "堅果類",
+        "截切加工",
+        "截切", "加工品",
+        "樣品",
+        "跨類綜合",
+        "代收付產品",
+        "雜項",
+        "收入", "折讓", "製造費用", "營業費用", "其他支出",
+        "包材",
+        "貼紙", "包裝托盤/盒", "包裝袋", "保鮮膜", "袋膜", "紙箱", "袖套", "套印", "其他", "物流籃", "棧板"
+    ];
+
+    // 初始化品類順序權重
+    categoryTree.forEach((name, index) => {
+        categoryOrderMap[name] = index;
+    });
+
+    // 輔助排序函數：品類排序
+    function compareCategories(a, b) {
+        const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
+        const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+        return a.localeCompare(b, 'zh-Hant');
+    }
+
+    // 輔助排序函數：其他倉庫標籤排序 (一廠在前藍色，二廠在後綠色，內部按指定順序)
+    function compareWarehouses(a, b) {
+        const infoA = whOrderMap[a.name];
+        const infoB = whOrderMap[b.name];
+
+        const fA = infoA ? infoA.factory : 'unknown';
+        const fB = infoB ? infoB.factory : 'unknown';
+
+        // 1. 先比廠別：factory1 優先於 factory2，最後是未知
+        if (fA !== fB) {
+            if (fA === 'factory1') return -1;
+            if (fB === 'factory1') return 1;
+            if (fA === 'factory2') return -1;
+            if (fB === 'factory2') return 1;
+        }
+
+        // 2. 同廠別內按指定順序排序
+        const scoreA = infoA ? infoA.score : 999;
+        const scoreB = infoB ? infoB.score : 999;
+        return scoreA - scoreB;
+    }
+
+    // CSV 解析函數
+    function parseCSV(text) {
+        let lines = [];
+        let row = [""];
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            let c = text[i];
+            let next = text[i+1];
+            if (c === '"') {
+                if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+                else { inQuotes = !inQuotes; }
+            } else if (c === ',' && !inQuotes) {
+                row.push('');
+            } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                if (c === '\r' && next === '\n') { i++; }
+                lines.push(row);
+                row = [''];
+            } else {
+                row[row.length - 1] += c;
+            }
+        }
+        if (row.length > 1 || row[0] !== '') { lines.push(row); }
+        return lines;
+    }
+
+    // 初始化獲取資料
+    async function init() {
+        try {
+            const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error("無法讀取雲端資料，請確認連結是否正確且已公開發布。");
+            const dataText = await response.text();
+            
+            const rows = parseCSV(dataText);
+            if (rows.length < 2) throw new Error("試算表內沒有足夠的資料。");
+
+            headers = rows[0].map(h => h.trim());
+            
+            // 自動偵測數量欄位
+            const qtyPattern = /(數量|庫存|存量|現存|結存|盤點|qty|stock|amount)/i;
+            for (let i = 0; i < headers.length; i++) {
+                if (qtyPattern.test(headers[i]) && i > colNameWarehouse) {
+                    colNameQty = i;
+                    break;
+                }
+            }
+            if (colNameQty === -1) {
+                colNameQty = headers.length - 1;
+            }
+
+            // 轉成物件並排除空列
+            rawData = rows.slice(1).filter(r => r.length === headers.length && r.some(cell => cell !== '')).map(r => {
+                let obj = {};
+                headers.forEach((h, i) => {
+                    obj[h] = r[i] ? r[i].trim() : '';
+                });
+                return obj;
+            });
+
+            // 取得 A 欄所有的不重複品類，並依據自訂的純中文排序對照表進行精確排序
+            const categoryKey = headers[colNameCategory];
+            const categories = new Set();
+            rawData.forEach(item => {
+                if (item[categoryKey]) {
+                    categories.add(item[categoryKey].trim());
+                }
+            });
+            const sortedCategories = Array.from(categories).sort(compareCategories);
+
+            // 渲染品類下拉選單
+            const catSelect = document.getElementById('category-select');
+            sortedCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                catSelect.appendChild(option);
+            });
+
+            // 隱藏加載訊息，顯示介面
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+
+            // 監聽器
+            document.getElementById('factory-select').addEventListener('change', handleFactoryChange);
+            document.getElementById('warehouse-select').addEventListener('change', handleWarehouseChange);
+            document.getElementById('category-select').addEventListener('change', handleCategoryChange);
+            document.getElementById('search-input').addEventListener('input', renderTable);
+            document.getElementById('btn-clear-all').addEventListener('click', clearAllFilters);
+
+            // 嘗試載入 LocalStorage 歷史設定
+            loadSavedSettings();
+
+        } catch (error) {
+            console.error(error);
+            const statusEl = document.getElementById('status');
+            statusEl.className = "status-message error";
+            statusEl.textContent = "讀取失敗: " + error.message;
+        }
+    }
+
+    // 廠別切換邏輯
+    function handleFactoryChange() {
+        const factorySelect = document.getElementById('factory-select');
+        const warehouseSelect = document.getElementById('warehouse-select');
+        const selectedFactory = factorySelect.value;
+
+        warehouseSelect.innerHTML = '';
+
+        // 建立選單選項
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = "";
+        placeholderOpt.textContent = "-- 全部倉庫 --";
+        warehouseSelect.appendChild(placeholderOpt);
+
+        if (!selectedFactory) {
+            // 若不選廠別，倉庫選單列出一、二廠所有的倉庫 (依照一廠、二廠各自定義之順序呈現)
+            const allWarehouses = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
+            allWarehouses.forEach(wh => {
+                const option = document.createElement('option');
+                option.value = wh;
+                option.textContent = wh;
+                warehouseSelect.appendChild(option);
+            });
+        } else {
+            const targetWarehouses = factoryWarehouseMap[selectedFactory] || [];
+            targetWarehouses.forEach(wh => {
+                const option = document.createElement('option');
+                option.value = wh;
+                option.textContent = wh;
+                warehouseSelect.appendChild(option);
+            });
+        }
+
+        // 預設為全部倉庫
+        warehouseSelect.value = "";
+
+        localStorage.setItem('saved_factory', selectedFactory);
+        localStorage.setItem('saved_warehouse', "");
+
+        renderTable();
+    }
+
+    // 倉庫切換邏輯
+    function handleWarehouseChange() {
+        const warehouseValue = document.getElementById('warehouse-select').value;
+        localStorage.setItem('saved_warehouse', warehouseValue);
+        renderTable();
+    }
+
+    // 品類切換邏輯
+    function handleCategoryChange() {
+        const categoryValue = document.getElementById('category-select').value;
+        localStorage.setItem('saved_category', categoryValue);
+        renderTable();
+    }
+
+    // 讀取 LocalStorage
+    function loadSavedSettings() {
+        const savedFactory = localStorage.getItem('saved_factory');
+        const savedWarehouse = localStorage.getItem('saved_warehouse');
+        const savedCategory = localStorage.getItem('saved_category');
+
+        // 1. 恢復廠別
+        if (savedFactory !== null) {
+            document.getElementById('factory-select').value = savedFactory;
+        }
+        
+        // 2. 初始化倉庫下拉
+        handleFactoryChange();
+
+        // 3. 恢復倉庫
+        if (savedWarehouse !== null && savedWarehouse !== "") {
+            const warehouseSelect = document.getElementById('warehouse-select');
+            if (Array.from(warehouseSelect.options).some(opt => opt.value === savedWarehouse)) {
+                warehouseSelect.value = savedWarehouse;
+            }
+        }
+
+        // 4. 恢復品類
+        if (savedCategory !== null) {
+            document.getElementById('category-select').value = savedCategory;
+        }
+
+        renderTable();
+    }
+
+    // 清空篩選
+    function clearAllFilters() {
+        document.getElementById('factory-select').value = "";
+        handleFactoryChange(); // 此處會自動重設倉庫選單
+
+        document.getElementById('category-select').value = "ALL";
+        document.getElementById('search-input').value = "";
+
+        localStorage.removeItem('saved_factory');
+        localStorage.removeItem('saved_warehouse');
+        localStorage.removeItem('saved_category');
+
+        renderTable();
+    }
+
+    // 安全轉換數值用函數
+    function parseStockValue(val) {
+        if (!val) return 0;
+        return parseFloat(val.replace(/,/g, '')) || 0;
+    }
+
+    // 渲染表格的核心邏輯
+    function renderTable() {
+        const activeFactory = document.getElementById('factory-select').value;
+        const activeWarehouse = document.getElementById('warehouse-select').value; // 空字串代表 "全部倉庫"
+        const activeCategory = document.getElementById('category-select').value;
+        const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+        
+        const tableBody = document.getElementById('table-body');
+        const tableHeaderLast = document.querySelector('#table-header th:last-child');
+        
+        const categoryKey = headers[colNameCategory];       // A 欄
+        const productCodeKey = headers[colNameProductCode]; // B 欄
+        const productNameKey = headers[colNameProductName]; // C 欄
+        const unitKey = headers[colNameUnit];               // D 欄
+        const warehouseKey = headers[colNameWarehouse];     // E 欄
+        const qtyKey = headers[colNameQty];                 // 數量欄
+
+        tableBody.innerHTML = '';
+
+        // 廠別跟倉庫選單有對應的完整倉庫範圍
+        let allowedWHS = [];
+        if (activeFactory === "factory1") {
+            allowedWHS = factoryWarehouseMap.factory1;
+        } else if (activeFactory === "factory2") {
+            allowedWHS = factoryWarehouseMap.factory2;
+        } else {
+            allowedWHS = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
+        }
+
+        // 如果廠別、倉庫、品類跟搜尋框皆為初始狀態（沒有指定特定查詢），則首頁預設空白
+        const isDefaultState = (!activeFactory && !activeWarehouse && activeCategory === "ALL" && !searchQuery);
+        if (isDefaultState) {
+            tableHeaderLast.textContent = '當前庫存 / 其他倉庫';
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#a0aec0; padding:50px; font-size:16px;">請先選擇廠別、倉庫或指定品類以載入庫存資料</td></tr>`;
+            return;
+        }
+
+        tableHeaderLast.textContent = `當前庫存 (${qtyKey}) / 其他倉明細`;
+
+        // 1. 篩選資料行
+        let filteredRows = rawData;
+
+        // 篩選倉庫
+        if (activeWarehouse) {
+            // 如果指定特定主倉庫，只載入該倉庫
+            filteredRows = filteredRows.filter(item => item[warehouseKey] === activeWarehouse);
+        } else {
+            // 如果是「全部倉庫」，僅載入符合當前所選廠別底下的倉庫資料
+            filteredRows = filteredRows.filter(item => allowedWHS.includes(item[warehouseKey]));
+        }
+
+        // 篩選品類
+        if (activeCategory !== 'ALL') {
+            filteredRows = filteredRows.filter(item => {
+                const itemCat = item[categoryKey] ? item[categoryKey].trim() : '';
+                return itemCat === activeCategory;
+            });
+        }
+
+        // 搜尋過濾
+        if (searchQuery !== '') {
+            filteredRows = filteredRows.filter(item => {
+                return (item[categoryKey] && item[categoryKey].toLowerCase().includes(searchQuery)) ||
+                       (item[productCodeKey] && item[productCodeKey].toLowerCase().includes(searchQuery)) ||
+                       (item[productNameKey] && item[productNameKey].toLowerCase().includes(searchQuery)) ||
+                       (item[unitKey] && item[unitKey].toLowerCase().includes(searchQuery)) ||
+                       (item[warehouseKey] && item[warehouseKey].toLowerCase().includes(searchQuery));
+            });
+        }
+
+        // 2. 依據品類目錄規則進行排序 (保證原始列顯示依品類整齊排列)
+        filteredRows.sort((a, b) => {
+            const catA = a[categoryKey] ? a[categoryKey].trim() : '';
+            const catB = b[categoryKey] ? b[categoryKey].trim() : '';
+            return compareCategories(catA, catB);
+        });
+
+        // 3. 逐列進行渲染並查找其他倉
+        filteredRows.forEach(item => {
+            const currentWhName = item[warehouseKey] || '';
+            const productCode = item[productCodeKey] || '';
+            const productName = item[productNameKey] || '';
+            const unitValue = item[unitKey] || '';
+            const mainStockValueRaw = item[qtyKey] || '0';
+
+            // 建立明細標籤容器
+            let badgesGrid = document.createElement('div');
+            badgesGrid.className = 'stock-badges-grid';
+
+            // 搜尋該項目在「其他所有倉庫」的庫存狀況 (精確對應：品項代號 B + 庫存單位 D 相同)
+            let otherWhsWithStock = [];
+            rawData.forEach(allItem => {
+                const isSameItem = (allItem[productCodeKey] === productCode) && (allItem[unitKey] === unitValue);
+                const isOtherWarehouse = (allItem[warehouseKey] !== currentWhName);
+                
+                if (isSameItem && isOtherWarehouse) {
+                    const otherWhQtyStr = allItem[qtyKey] || '0';
+                    const otherWhQtyNum = parseStockValue(otherWhQtyStr);
+                    // 僅列出庫存大於 0 的倉庫
+                    if (otherWhQtyNum > 0) {
+                        otherWhsWithStock.push({ name: allItem[warehouseKey], qty: otherWhQtyStr });
+                    }
+                }
+            });
+
+            // 對其他有庫存的倉庫進行排序 (一廠在前，二廠在後；同廠按指定順序)
+            otherWhsWithStock.sort(compareWarehouses);
+
+            // 渲染其他倉標籤 (一廠用藍色標籤、二廠用綠色標籤)
+            if (otherWhsWithStock.length > 0) {
+                otherWhsWithStock.forEach(wh => {
+                    const pill = document.createElement('span');
+                    
+                    // 檢查是屬於一廠還是二廠的倉庫，並帶入對應樣式
+                    const whInfo = whOrderMap[wh.name];
+                    const factory = whInfo ? whInfo.factory : 'factory1'; // 預設一廠
+
+                    if (factory === 'factory2') {
+                        pill.className = 'stock-badge-pill-f2'; // 二廠綠色
+                    } else {
+                        pill.className = 'stock-badge-pill-f1'; // 一廠藍色
+                    }
+                    
+                    pill.textContent = `${wh.name}: ${wh.qty}`;
+                    badgesGrid.appendChild(pill);
+                });
+            } else {
+                const noStock = document.createElement('span');
+                noStock.className = 'no-other-stock';
+                noStock.textContent = '(其他倉無此品項)';
+                badgesGrid.appendChild(noStock);
+            }
+
+            const tr = document.createElement('tr');
+
+            // 品類
+            const tdCat = document.createElement('td');
+            tdCat.setAttribute('data-label', '品類');
+            tdCat.textContent = item[categoryKey] || '-';
+            tr.appendChild(tdCat);
+
+            // 品項代號
+            const tdCode = document.createElement('td');
+            tdCode.setAttribute('data-label', '品項代號');
+            tdCode.textContent = productCode || '-';
+            tr.appendChild(tdCode);
+
+            // 品名
+            const tdName = document.createElement('td');
+            tdName.setAttribute('data-label', '品名');
+            tdName.textContent = productName || '-';
+            tdName.style.fontWeight = '600';
+            tr.appendChild(tdName);
+
+            // 庫存單位
+            const tdUnit = document.createElement('td');
+            tdUnit.setAttribute('data-label', '庫存單位');
+            tdUnit.textContent = unitValue || '-';
+            tr.appendChild(tdUnit);
+
+            // 庫存與各倉明細
+            const tdStock = document.createElement('td');
+            tdStock.setAttribute('data-label', `庫存 (${currentWhName}) / 其他倉庫`);
+            tdStock.style.textAlign = 'right';
+
+            const stockContainer = document.createElement('div');
+            stockContainer.className = 'stock-container';
+
+            // 主要顯示當前列對應之倉庫庫存
+            const mainStockSpan = document.createElement('span');
+            mainStockSpan.className = 'main-stock';
+            // 如果顯示的是全部倉庫，則在庫存前加註該列的倉庫名稱，便於辨識
+            if (!activeWarehouse) {
+                mainStockSpan.textContent = `${currentWhName}: ${mainStockValueRaw}`;
+            } else {
+                mainStockSpan.textContent = mainStockValueRaw;
+            }
+
+            stockContainer.appendChild(mainStockSpan);
+            stockContainer.appendChild(badgesGrid);
+
+            tdStock.appendChild(stockContainer);
+            tr.appendChild(tdStock);
+
+            tableBody.appendChild(tr);
+        });
+
+        if (filteredRows.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#a0aec0; padding:30px;">沒有找到符合搜尋條件的品項</td></tr>`;
+        }
+    }
+
+    window.onload = init;
+</script>
+
+</body>
+</html>
