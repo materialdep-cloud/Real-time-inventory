@@ -253,6 +253,16 @@
             border: 1px solid #fed7d7;
         }
 
+        /* 廠別小標籤與品名下方小字樣式 */
+        .wh-subtext {
+            font-size: 11px;
+            color: #718096;
+            font-weight: normal;
+            margin-top: 4px;
+            text-align: left;
+            line-height: 1.3;
+        }
+
         /* 手機版 RWD 優化：寬度小於 768px 時轉換為卡片式排列 */
         @media (max-width: 767px) {
             body {
@@ -333,6 +343,13 @@
                 text-align: right;
                 word-wrap: break-word;
                 word-break: break-all;
+            }
+
+            /* 手機版讓品名下的所屬倉庫小字保持左對齊或在手機卡片內自然排列 */
+            .wh-subtext {
+                text-align: right;
+                margin-top: 2px;
+                width: 100%;
             }
 
             .stock-container {
@@ -497,7 +514,7 @@
         categoryOrderMap[name] = index;
     });
 
-    // 輔助排序函數：品類排序
+    // 輔劇排序函數：品類排序
     function compareCategories(a, b) {
         const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
         const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
@@ -895,6 +912,14 @@
             spanName.textContent = productName || '-';
             spanName.style.fontWeight = '600';
             tdName.appendChild(spanName);
+
+            // 關鍵修改：如果是全部倉庫模式，在品名下方加註所屬倉庫小字，保持整齊
+            if (!activeWarehouse) {
+                const whSubText = document.createElement('div');
+                whSubText.className = 'wh-subtext';
+                whSubText.textContent = `所屬倉庫: ${currentWhName}`;
+                tdName.appendChild(whSubText);
+            }
             tr.appendChild(tdName);
 
             // 庫存單位
@@ -907,7 +932,8 @@
 
             // 庫存與各倉明細
             const tdStock = document.createElement('td');
-            tdStock.setAttribute('data-label', `庫存 (${currentWhName}) / 其他倉庫`);
+            // 關鍵修改：簡化手機版的文字欄位，不再顯示落落長的倉庫名，保持乾淨
+            tdStock.setAttribute('data-label', '當前庫存 / 其他倉庫');
             tdStock.style.textAlign = 'right';
 
             const stockContainer = document.createElement('div');
@@ -916,12 +942,8 @@
             // 主要顯示當前列對應之倉庫庫存
             const mainStockSpan = document.createElement('span');
             mainStockSpan.className = 'main-stock';
-            // 如果顯示的是全部倉庫，則在庫存前加註該列的倉庫名稱，便於辨識
-            if (!activeWarehouse) {
-                mainStockSpan.textContent = `${currentWhName}: ${mainStockValueRaw}`;
-            } else {
-                mainStockSpan.textContent = mainStockValueRaw;
-            }
+            // 關鍵修改：庫存前面永遠不加註倉庫名稱，只顯示單純、好讀的數量！
+            mainStockSpan.textContent = mainStockValueRaw;
 
             stockContainer.appendChild(mainStockSpan);
             stockContainer.appendChild(badgesGrid);
