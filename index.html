@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>倉庫庫存查詢系統</title>
+    <title>即時庫存查詢系統</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -56,6 +56,27 @@
         .subtitle {
             color: #718096;
             font-size: 13px;
+        }
+
+        /* 刷新資訊列樣式 */
+        .refresh-info {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #last-update-time {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        #next-update-countdown {
+            font-weight: 600;
+            color: var(--accent-color);
         }
 
         .control-panel {
@@ -353,8 +374,13 @@
 
 <div class="container">
     <header>
-        <h1>即時倉庫庫存查詢系統</h1>
+        <h1>即時庫存查詢系統</h1>
         <div class="subtitle">資料來源：Google Sheets 雲端試算表</div>
+        <!-- 顯示刷新時間的全新資訊列 -->
+        <div class="refresh-info" id="refresh-info-panel" style="display: none;">
+            <span>數據刷新時間：<span id="last-update-time">載入中...</span></span>
+            <span>(<span id="next-update-countdown">30</span> 秒後自動更新)</span>
+        </div>
     </header>
 
     <div id="status" class="status-message loading">正在從 Google Sheets 載入最新庫存資料...</div>
@@ -430,6 +456,9 @@
 
     let rawData = [];               // 原始資料物件陣列
     let headers = [];               // 欄位標題
+    let isFirstLoad = true;         // 是否為第一次加載
+    let countdown = 30;             // 刷新倒數計時（30秒）
+    let countdownInterval = null;   // 倒數計時器
     
     // 固定欄位索引
     const colNameCategory = 0;      // A 欄 -> 品類
@@ -557,8 +586,39 @@
         return lines;
     }
 
-    // 初始化獲取資料
-    async function init() {
+    // 格式化當前時間為 YYYY-MM-DD HH:mm:ss
+    function updateLastUpdatedTime() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('last-update-time').textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    }
+
+    // 控制刷新倒數計時
+    function startCountdown() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+        countdown = 30;
+        document.getElementById('next-update-countdown').textContent = countdown;
+        
+        countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                fetchData(); // 倒數結束，執行靜態抓取
+            } else {
+                document.getElementById('next-update-countdown').textContent = countdown;
+            }
+        }, 1000);
+    }
+
+    // 從 Google Sheets 擷取最新資料
+    async function fetchData() {
         try {
             const response = await fetch(csvUrl);
             if (!response.ok) throw new Error("無法讀取雲端資料，請確認連結是否正確且已公開發布。");
@@ -590,45 +650,68 @@
                 return obj;
             });
 
-            // 取得 A 欄所有的不重複品類，並依據自訂的純中文排序對照表進行精確排序
-            const categoryKey = headers[colNameCategory];
-            const categories = new Set();
-            rawData.forEach(item => {
-                if (item[categoryKey]) {
-                    categories.add(item[categoryKey].trim());
-                }
-            });
-            const sortedCategories = Array.from(categories).sort(compareCategories);
+            // 如果是第一次載入，進行下拉選單建置與介面切換
+            if (isFirstLoad) {
+                const categoryKey = headers[colNameCategory];
+                const categories = new Set();
+                rawData.forEach(item => {
+                    if (item[categoryKey]) {
+                        categories.add(item[categoryKey].trim());
+                    }
+                });
+                const sortedCategories = Array.from(categories).sort(compareCategories);
 
-            // 渲染品類下拉選單
-            const catSelect = document.getElementById('category-select');
-            sortedCategories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                catSelect.appendChild(option);
-            });
+                // 渲染品類下拉選單
+                const catSelect = document.getElementById('category-select');
+                sortedCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    catSelect.appendChild(option);
+                });
 
-            // 隱藏加載訊息，顯示介面
-            document.getElementById('status').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
+                // 隱藏加載訊息，顯示主介面與時間列
+                document.getElementById('status').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('refresh-info-panel').style.display = 'flex';
 
-            // 監聽器
-            document.getElementById('factory-select').addEventListener('change', handleFactoryChange);
-            document.getElementById('warehouse-select').addEventListener('change', handleWarehouseChange);
-            document.getElementById('category-select').addEventListener('change', handleCategoryChange);
-            document.getElementById('search-input').addEventListener('input', renderTable);
-            document.getElementById('btn-clear-all').addEventListener('click', clearAllFilters);
+                // 嘗試載入 LocalStorage 歷史設定
+                loadSavedSettings();
+                isFirstLoad = false;
+            } else {
+                // 如果是自動刷新，直接呼叫表格重繪，保持使用者現有的選取與操作狀態不被中斷
+                renderTable();
+            }
 
-            // 嘗試載入 LocalStorage 歷史設定
-            loadSavedSettings();
+            // 更新上次更新時間與重新倒數
+            updateLastUpdatedTime();
+            startCountdown();
 
         } catch (error) {
             console.error(error);
-            const statusEl = document.getElementById('status');
-            statusEl.className = "status-message error";
-            statusEl.textContent = "讀取失敗: " + error.message;
+            if (isFirstLoad) {
+                const statusEl = document.getElementById('status');
+                statusEl.className = "status-message error";
+                statusEl.textContent = "讀取失敗: " + error.message;
+            } else {
+                // 自動刷新失敗時，默默記錄並在 5 秒後重試，不打擾使用者
+                console.log("自動背景刷新失敗: " + error.message);
+                setTimeout(fetchData, 5000);
+            }
         }
+    }
+
+    // 初始化獲取資料
+    async function init() {
+        // 註冊監聽器
+        document.getElementById('factory-select').addEventListener('change', handleFactoryChange);
+        document.getElementById('warehouse-select').addEventListener('change', handleWarehouseChange);
+        document.getElementById('category-select').addEventListener('change', handleCategoryChange);
+        document.getElementById('search-input').addEventListener('input', renderTable);
+        document.getElementById('btn-clear-all').addEventListener('click', clearAllFilters);
+
+        // 啟動資料下載
+        await fetchData();
     }
 
     // 廠別切換邏輯
