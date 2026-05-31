@@ -9,8 +9,8 @@
             --primary-color: #2c3e50;
             --accent-color: #2ecc71; /* 調整為更明亮活力的綠活品牌綠 */
             --accent-blue: #3498db;
-            --bg-color: #f1fcf1; /* 關鍵修改：將原始的淡灰 #f8f9fa 改為更符合品牌形象的淡綠色 */
-            --card-bg: #ffffff; /* 保持卡片為純白，以獲得良好的對比 */
+            --bg-color: #f1fcf1; /* 淡綠色背景 */
+            --card-bg: #ffffff;
             --text-color: #2d3748;
             --border-color: #e2e8f0;
             --danger-color: #e53e3e;
@@ -26,20 +26,148 @@
         }
 
         body {
-            background-color: var(--bg-color); /* 應用淡綠色背景 */
+            background-color: var(--bg-color); 
             color: var(--text-color);
             padding: 20px 10px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
 
+        /* 密碼驗證畫面 */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .login-logo {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .login-input-group {
+            position: relative;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .login-input {
+            width: 100%;
+            height: 48px;
+            padding: 10px 45px 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-input:focus {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #718096;
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            background-color: var(--brand-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: #219653;
+        }
+
+        .login-error {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* 登出按鈕 */
+        .logout-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: #718096;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background-color: #edf2f7;
+            color: var(--danger-color);
+            border-color: #fed7d7;
+        }
+
+        /* 主容器 */
         .container {
             width: 100%;
             max-width: 1200px;
-            background: var(--card-bg); /* 卡片保持純白 */
+            background: var(--card-bg);
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: none; 
         }
 
         header {
@@ -51,7 +179,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* 關鍵修改：微調頁首漸層，使其與新的淡綠色背景無縫過渡 */
             background: linear-gradient(135deg, rgba(46, 204, 113, 0.05) 0%, rgba(241, 252, 241, 0) 100%);
             border-radius: 8px;
         }
@@ -77,14 +204,6 @@
             color: var(--brand-green);
             letter-spacing: 1px;
             line-height: 1.2;
-        }
-
-        .logo-sub-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 3px;
         }
 
         h1 {
@@ -126,7 +245,6 @@
             grid-template-columns: 1fr;
             gap: 15px;
             margin-bottom: 25px;
-            /* 關鍵修改：將原始的淡藍色 #f7fafc 改為品牌內部的淡綠色，保持視覺一致性 */
             background: #f0fff4;
             padding: 20px;
             border-radius: 8px;
@@ -162,7 +280,7 @@
             transition: border-color 0.2s, box-shadow 0.2s;
             color: var(--text-color);
             width: 100%;
-            height: 44px; /* 統一高度，方便觸控 */
+            height: 44px;
         }
 
         select:focus, input:focus {
@@ -203,7 +321,7 @@
             border-collapse: collapse;
             text-align: left;
             font-size: 15px;
-            table-layout: fixed; /* 電腦端平均分配欄位寬度 */
+            table-layout: fixed;
         }
 
         th {
@@ -214,13 +332,12 @@
             white-space: nowrap;
         }
 
-        /* 重新調配 6 個欄位在電腦端的寬度比例 */
-        th:nth-child(1), td:nth-child(1) { width: 12%; } /* 品類 */
-        th:nth-child(2), td:nth-child(2) { width: 12%; } /* 品項代號 */
-        th:nth-child(3), td:nth-child(3) { width: 23%; } /* 品名 */
-        th:nth-child(4), td:nth-child(4) { width: 10%; } /* 庫存單位 */
-        th:nth-child(5), td:nth-child(5) { width: 16%; } /* 所屬倉庫 */
-        th:nth-child(6), td:nth-child(6) { width: 27%; } /* 當前庫存與其他倉 */
+        th:nth-child(1), td:nth-child(1) { width: 12%; }
+        th:nth-child(2), td:nth-child(2) { width: 12%; }
+        th:nth-child(3), td:nth-child(3) { width: 23%; }
+        th:nth-child(4), td:nth-child(4) { width: 10%; }
+        th:nth-child(5), td:nth-child(5) { width: 16%; }
+        th:nth-child(6), td:nth-child(6) { width: 27%; }
 
         td {
             padding: 14px 16px;
@@ -238,7 +355,6 @@
             background-color: #f7fafc;
         }
 
-        /* 庫存顯示容器 */
         .stock-container {
             display: flex;
             flex-direction: column;
@@ -253,7 +369,6 @@
             color: #1a202c;
         }
 
-        /* 精緻庫存標籤網格 - 防撐寬優化 */
         .stock-badges-grid {
             display: flex;
             flex-wrap: wrap;
@@ -264,7 +379,6 @@
             margin-top: 2px;
         }
 
-        /* 一廠專屬藍色標籤 */
         .stock-badge-pill-f1 {
             font-size: 11px;
             padding: 3px 8px;
@@ -278,7 +392,6 @@
             white-space: nowrap;
         }
 
-        /* 二廠專屬綠色標籤 */
         .stock-badge-pill-f2 {
             font-size: 11px;
             padding: 3px 8px;
@@ -318,104 +431,66 @@
             border: 1px solid #fed7d7;
         }
 
-        /* 手機版 RWD 優化：寬度小於 768px 時轉換為卡片式排列 */
         @media (max-width: 767px) {
-            body {
-                padding: 10px 5px;
-            }
-
-            .container {
-                padding: 15px 12px;
-                border-radius: 8px;
-            }
-
-            .table-container {
-                border: none;
-                overflow: hidden; /* 防止整個表格容器水平溢出 */
-            }
-            
-            table {
-                display: block;
-                table-layout: auto;
-                width: 100%;
-            }
-
-            thead {
-                display: none; /* 隱藏傳統表頭 */
-            }
-
-            tbody {
-                display: block;
-                width: 100%;
-            }
-
-            tr {
-                display: block;
-                background: #ffffff;
-                border: 1px solid var(--border-color);
-                border-radius: 10px;
-                padding: 12px;
-                margin-bottom: 12px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-                width: 100%;
-            }
-
-            tr:nth-child(even) {
-                background-color: #ffffff;
-            }
-
-            td {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start; /* 頂部對齊，避免長內容錯位 */
-                padding: 10px 0;
-                border-bottom: 1px dashed #edf2f7;
-                width: 100% !important; /* 蓋掉電腦端的固定百分比 */
-                text-align: right;
-                font-size: 14px;
-                gap: 15px; /* 標籤和數值之間留出間距 */
-            }
-
-            td:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-                margin-top: 5px;
-            }
-
-            /* 手機版動態注入標籤說明 (限制最大寬度防止撐開) */
-            td::before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: var(--primary-color);
-                text-align: left;
-                flex-shrink: 0;
-                width: 32%; /* 給予標題適當寬度 */
-            }
-
-            /* 手機卡片右側內容區域 */
-            td > span, td > div {
-                max-width: 65%; /* 限制右側內容最大寬度，強迫長品名或代號自動折行 */
-                text-align: right;
-                word-wrap: break-word;
-                word-break: break-all;
-            }
-
-            .stock-container {
-                align-items: flex-end;
-                width: 100%;
-            }
-
-            .stock-badges-grid {
-                justify-content: flex-end;
-                margin-top: 4px;
-                max-width: 100%; /* 防止標籤牆將右邊界擠出去 */
-            }
+            body { padding: 10px 5px; }
+            .container { padding: 15px 12px; border-radius: 8px; }
+            .table-container { border: none; overflow: hidden; }
+            table { display: block; table-layout: auto; width: 100%; }
+            thead { display: none; }
+            tbody { display: block; width: 100%; }
+            tr { display: block; background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); width: 100%; }
+            tr:nth-child(even) { background-color: #ffffff; }
+            td { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed #edf2f7; width: 100% !important; text-align: right; font-size: 14px; gap: 15px; }
+            td:last-child { border-bottom: none; padding-bottom: 0; margin-top: 5px; }
+            td::before { content: attr(data-label); font-weight: bold; color: var(--primary-color); text-align: left; flex-shrink: 0; width: 32%; }
+            td > span, td > div { max-width: 65%; text-align: right; word-wrap: break-word; word-break: break-all; }
+            .stock-container { align-items: flex-end; width: 100%; }
+            .stock-badges-grid { justify-content: flex-end; margin-top: 4px; max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- 密碼驗證鎖定畫面 -->
+<div id="login-overlay">
+    <div class="login-card">
+        <div class="login-logo">
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 85C50 85 25 65 25 45C25 25 45 20 50 35C55 20 75 25 75 45C75 65 50 85 50 85Z" fill="#2ecc71" opacity="0.15"/>
+                <path d="M50 80C50 80 30 62 30 45C30 30 45 27 50 38C55 27 70 30 70 45C70 62 50 80 50 80Z" fill="#27ae60" opacity="0.85"/>
+                <path d="M28 44C28 32 38 24 50 24C62 24 72 32 72 44C60 41 40 41 28 44Z" fill="#f39c12"/>
+                <path d="M47 43H53V72C53 74 51 75 49 75C47 75 47 74 47 72V43Z" fill="#f1c40f"/>
+                <circle cx="40" cy="32" r="3" fill="#ffffff" opacity="0.7"/>
+                <circle cx="60" cy="34" r="2.5" fill="#ffffff" opacity="0.7"/>
+            </svg>
+            <span class="logo-main-title" style="margin-top: 10px;">Green Living</span>
+        </div>
+        <p style="margin-bottom: 25px; color: #718096; font-size: 14px;">此系統包含商業內部庫存機密，請輸入密碼以進行查詢</p>
+        
+        <div class="login-input-group">
+            <input type="password" id="password-input" class="login-input" placeholder="請輸入登入密碼..." autofocus>
+            <button class="toggle-password" id="btn-toggle-pwd" type="button" title="顯示/隱藏密碼">
+                <svg id="eye-icon" style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+            </button>
+        </div>
+        <button class="login-btn" id="btn-submit-pwd">確認驗證</button>
+        <div class="login-error" id="login-error-msg">密碼錯誤，請重新輸入</div>
+    </div>
+</div>
+
+<!-- 主功能容器 -->
+<div class="container" id="app-container">
+    <div class="logout-btn-container">
+        <button class="btn-logout" id="btn-logout" type="button">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24">
+                <path d="M14.08 15.59L16.67 13H7V11H16.67L14.08 8.41L15.5 7L20.5 12L15.5 17L14.08 15.59M19 3A2 2 0 0 1 21 5V9.67L19 7.67V5H5V19H19V16.33L21 14.33V19A2 2 0 0 1 19 21H5C3.9 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H19Z"/>
+            </svg>
+            安全登出
+        </button>
+    </div>
+
     <header>
         <div class="logo-container">
             <svg width="46" height="46" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -438,9 +513,10 @@
         </div>
     </header>
 
-    <div id="status" class="status-message loading">正在從 Google Sheets 載入最新庫存資料...</div>
+    <div id="status" class="status-message loading" style="display: none;">正在從 Google Sheets 載入最新庫存資料...</div>
 
     <div id="main-content" style="display: none;">
+        <!-- 四欄控制選單 -->
         <div class="control-panel">
             <div class="form-group">
                 <label for="factory-select">1. 選擇廠別：</label>
@@ -454,14 +530,16 @@
             <div class="form-group">
                 <label for="warehouse-select">2. 選擇主查詢倉庫：</label>
                 <select id="warehouse-select">
-                    </select>
+                    <!-- 動態載入選單內容 -->
+                </select>
             </div>
 
             <div class="form-group">
                 <label for="category-select">3. 選擇品類 (A欄)：</label>
                 <select id="category-select">
                     <option value="ALL">-- 全部品類 --</option>
-                    </select>
+                    <!-- 動態載入品類選項 -->
+                </select>
             </div>
 
             <div class="form-group">
@@ -494,31 +572,31 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    </tbody>
+                    <!-- 動態產生表格內容 -->
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script>
-    // 您的 Google Sheet CSV 連結
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqhij3tYIKCP5YwznxO0uCrthJDE09xE8pOG76mejZDrH6xFyPRndBKnx9UBwQmnxxyvcE9vUUZJqk/pub?gid=322034433&single=true&output=csv";
+    const SYSTEM_PASSWORD = "54039755";
+    const AUTH_TIMEOUT = 24 * 60 * 60 * 1000; 
 
-    let rawData = [];               // 原始資料物件陣列
-    let headers = [];               // 欄位標題
-    let isFirstLoad = true;         // 是否為第一次加載
-    let countdown = 30;             // 刷新倒數計時（30秒）
-    let countdownInterval = null;   // 倒數計時器
+    let rawData = [];
+    let headers = [];
+    let isFirstLoad = true;
+    let countdown = 30;
+    let countdownInterval = null;
     
-    // 固定欄位索引
-    const colNameCategory = 0;      // A 欄 -> 品類
-    const colNameProductCode = 1;   // B 欄 -> 品項代號
-    const colNameProductName = 2;   // C 欄 -> 品名
-    const colNameUnit = 3;          // D 欄 -> 庫存單位
-    const colNameWarehouse = 4;     // E 欄 -> 倉庫
-    let colNameQty = -1;            // 庫存數量
+    const colNameCategory = 0;
+    const colNameProductCode = 1;
+    const colNameProductName = 2;
+    const colNameUnit = 3;
+    const colNameWarehouse = 4;
+    let colNameQty = -1;
 
-    // 廠別倉庫順序定義 (一廠鎖定 63-7倉)
     const factoryWarehouseMap = {
         factory1: [
             "63-7倉",
@@ -540,82 +618,27 @@
         ]
     };
 
-    // 建立倉庫名稱與其權重、廠別對應字典，以便後續進行精準分廠排序
     const whOrderMap = {};
-    factoryWarehouseMap.factory1.forEach((name, index) => {
-        whOrderMap[name] = { factory: 'factory1', score: index };
-    });
-    factoryWarehouseMap.factory2.forEach((name, index) => {
-        whOrderMap[name] = { factory: 'factory2', score: index };
-    });
+    factoryWarehouseMap.factory1.forEach((name, index) => { whOrderMap[name] = { factory: 'factory1', score: index }; });
+    factoryWarehouseMap.factory2.forEach((name, index) => { whOrderMap[name] = { factory: 'factory2', score: index }; });
 
-    // 品類樹狀目錄定義
     const categoryOrderMap = {};
     const categoryTree = [
-        "菇類",
-        "香菇", "杏鮑菇", "木耳", "銀耳", "金針", "鴻喜雪白", "秀珍", "洋菇", "雜菇", "綜合菇", "乾香菇",
-        "蔬菜類",
-        "芽菜", "瓜菜", "根菜", "莖菜", "葉菜", "包葉菜", "花菜", "果菜", "豆菜", "生菜",
-        "雜糧特用類",
-        "雜糧特用",
-        "水果類",
-        "水果",
-        "其他農產類",
-        "花草", "蜂類", "藻類", "堅果類",
-        "截切加工",
-        "截切", "加工品",
-        "樣品",
-        "跨類綜合",
-        "代收付產品",
-        "雜項",
-        "收入", "折讓", "製造費用", "營業費用", "其他支出",
-        "包材",
-        "貼紙", "包裝托盤/盒", "包裝袋", "保鮮膜", "袋膜", "紙箱", "袖套", "套印", "其他", "物流籃", "棧板"
+        "菇類", "香菇", "杏鮑菇", "木耳", "銀耳", "金針", "鴻喜雪白", "秀珍", "洋菇", "雜菇", "綜合菇", "乾香菇",
+        "蔬菜類", "芽菜", "瓜菜", "根菜", "莖菜", "葉菜", "包葉菜", "花菜", "果菜", "豆菜", "生菜",
+        "雜糧特用類", "雜糧特用", "水果類", "水果",
+        "其他農產類", "花草", "蜂類", "藻類", "堅果類",
+        "截切加工", "截切", "加工品", "樣品", "跨類綜合", "代收付產品",
+        "雜項", "收入", "折讓", "製造費用", "營業費用", "其他支出",
+        "包材", "貼紙", "包裝托盤/盒", "包裝袋", "保鮮膜", "袋膜", "紙箱", "袖套", "套印", "其他", "物流籃", "棧板"
     ];
 
-    // 初始化品類順序權重
-    categoryTree.forEach((name, index) => {
-        categoryOrderMap[name] = index;
-    });
+    categoryTree.forEach((name, index) => { categoryOrderMap[name] = index; });
 
-    // 輔助排序函數：品類排序
-    function compareCategories(a, b) {
-        const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
-        const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
-        if (orderA !== orderB) {
-            return orderA - orderB;
-        }
-        return a.localeCompare(b, 'zh-Hant');
-    }
-
-    // 輔助排序函數：其他倉庫標籤排序 (一廠在前藍色，二廠在後綠色，內部按指定順序)
-    function compareWarehouses(a, b) {
-        const infoA = whOrderMap[a.name];
-        const infoB = whOrderMap[b.name];
-
-        const fA = infoA ? infoA.factory : 'unknown';
-        const fB = infoB ? infoB.factory : 'unknown';
-
-        // 1. 先比廠別：factory1 優先於 factory2，最後是未知
-        if (fA !== fB) {
-            if (fA === 'factory1') return -1;
-            if (fB === 'factory1') return 1;
-            if (fA === 'factory2') return -1;
-            if (fB === 'factory2') return 1;
-        }
-
-        // 2. 同廠別內按指定順序排序
-        const scoreA = infoA ? infoA.score : 999;
-        const scoreB = infoB ? infoB.score : 999;
-        return scoreA - scoreB;
-    }
-
-    // CSV 解析函數
     function parseCSV(text) {
         let lines = [];
         let row = [""];
         let inQuotes = false;
-
         for (let i = 0; i < text.length; i++) {
             let c = text[i];
             let next = text[i+1];
@@ -636,7 +659,97 @@
         return lines;
     }
 
-    // 格式化當前時間為 YYYY-MM-DD HH:mm:ss
+    function checkAuth() {
+        const savedAuthTime = localStorage.getItem('gl_auth_time');
+        const now = Date.now();
+        if (savedAuthTime && (now - parseInt(savedAuthTime)) < AUTH_TIMEOUT) {
+            showApp();
+        } else {
+            showLogin();
+        }
+    }
+
+    function showApp() {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        document.getElementById('status').style.display = 'block';
+        initApp();
+    }
+
+    function showLogin() {
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+        
+        const pwdInput = document.getElementById('password-input');
+        pwdInput.value = '';
+        pwdInput.focus();
+
+        document.getElementById('btn-submit-pwd').onclick = validatePassword;
+        pwdInput.onkeydown = function(e) {
+            if (e.key === 'Enter') validatePassword();
+        };
+
+        document.getElementById('btn-toggle-pwd').onclick = function() {
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === "password") {
+                pwdInput.type = "text";
+                eyeIcon.innerHTML = `<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.82l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.74-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.17C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.07 21 20.5 19.57 3.43 2.83 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.1-3.21l1.91 1.91C13.13 8.18 12.59 8 12 8c-2.21 0-4 1.79-4 4 0 .59.18 1.13.5 1.54l1.91 1.91c.05-.14.09-.3.09-.45 0-1.1.9-2 2-2 .15 0 .31.04.45.09z"/>`;
+            } else {
+                pwdInput.type = "password";
+                eyeIcon.innerHTML = `<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>`;
+            }
+        };
+    }
+
+    function validatePassword() {
+        const pwdInput = document.getElementById('password-input');
+        const errorMsg = document.getElementById('login-error-msg');
+        if (pwdInput.value === SYSTEM_PASSWORD) {
+            errorMsg.style.display = 'none';
+            localStorage.setItem('gl_auth_time', Date.now().toString());
+            showApp();
+        } else {
+            errorMsg.style.display = 'block';
+            pwdInput.value = '';
+            pwdInput.focus();
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('gl_auth_time');
+        if (countdownInterval) clearInterval(countdownInterval);
+        isFirstLoad = true;
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('refresh-info-panel').style.display = 'none';
+        document.getElementById('category-select').innerHTML = '<option value="ALL">-- 全部品類 --</option>';
+        showLogin();
+    }
+
+    function compareCategories(a, b) {
+        const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
+        const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.localeCompare(b, 'zh-Hant');
+    }
+
+    function compareWarehouses(a, b) {
+        const infoA = whOrderMap[a.name];
+        const infoB = whOrderMap[b.name];
+        const fA = infoA ? infoA.factory : 'unknown';
+        const fB = infoB ? infoB.factory : 'unknown';
+
+        if (fA !== fB) {
+            if (fA === 'factory1') return -1;
+            if (fB === 'factory1') return 1;
+            if (fA === 'factory2') return -1;
+            if (fB === 'factory2') return 1;
+        }
+        const scoreA = infoA ? infoA.score : 999;
+        const scoreB = infoB ? infoB.score : 999;
+        return scoreA - scoreB;
+    }
+
     function updateLastUpdatedTime() {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -648,26 +761,21 @@
         document.getElementById('last-update-time').textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
     }
 
-    // 控制刷新倒數計時
     function startCountdown() {
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-        }
+        if (countdownInterval) clearInterval(countdownInterval);
         countdown = 30;
         document.getElementById('next-update-countdown').textContent = countdown;
-        
         countdownInterval = setInterval(() => {
             countdown--;
             if (countdown < 0) {
                 clearInterval(countdownInterval);
-                fetchData(); // 倒數結束，執行靜態抓取
+                fetchData(); 
             } else {
                 document.getElementById('next-update-countdown').textContent = countdown;
             }
         }, 1000);
     }
 
-    // 從 Google Sheets 擷取最新資料
     async function fetchData() {
         try {
             const response = await fetch(csvUrl);
@@ -678,40 +786,25 @@
             if (rows.length < 2) throw new Error("試算表內沒有足夠的資料。");
 
             headers = rows[0].map(h => h.trim());
-            
-            // 自動偵測數量欄位
-            const qtyPattern = /(數量|庫存|存量|現存|結存|盤點|qty|stock|amount)/i;
             for (let i = 0; i < headers.length; i++) {
-                if (qtyPattern.test(headers[i]) && i > colNameWarehouse) {
+                if (/(數量|庫存|存量|現存|結存|盤點|qty|stock|amount)/i.test(headers[i]) && i > colNameWarehouse) {
                     colNameQty = i;
                     break;
                 }
             }
-            if (colNameQty === -1) {
-                colNameQty = headers.length - 1;
-            }
+            if (colNameQty === -1) colNameQty = headers.length - 1;
 
-            // 轉成物件並排除空列
             rawData = rows.slice(1).filter(r => r.length === headers.length && r.some(cell => cell !== '')).map(r => {
                 let obj = {};
-                headers.forEach((h, i) => {
-                    obj[h] = r[i] ? r[i].trim() : '';
-                });
+                headers.forEach((h, i) => { obj[h] = r[i] ? r[i].trim() : ''; });
                 return obj;
             });
 
-            // 如果是第一次載入，進行下拉選單建置與介面切換
             if (isFirstLoad) {
-                const categoryKey = headers[colNameCategory];
                 const categories = new Set();
-                rawData.forEach(item => {
-                    if (item[categoryKey]) {
-                        categories.add(item[categoryKey].trim());
-                    }
-                });
+                rawData.forEach(item => { if (item[headers[colNameCategory]]) categories.add(item[headers[colNameCategory]].trim()); });
                 const sortedCategories = Array.from(categories).sort(compareCategories);
 
-                // 渲染品類下拉選單
                 const catSelect = document.getElementById('category-select');
                 sortedCategories.forEach(cat => {
                     const option = document.createElement('option');
@@ -720,20 +813,16 @@
                     catSelect.appendChild(option);
                 });
 
-                // 隱藏加載訊息，顯示主介面與時間列
                 document.getElementById('status').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 document.getElementById('refresh-info-panel').style.display = 'flex';
 
-                // 嘗試載入 LocalStorage 歷史設定
                 loadSavedSettings();
                 isFirstLoad = false;
             } else {
-                // 如果是自動刷新，直接呼叫表格重繪，保持使用者現有的選取與操作狀態不被中斷
                 renderTable();
             }
 
-            // 更新上次更新時間與重新倒數
             updateLastUpdatedTime();
             startCountdown();
 
@@ -742,29 +831,28 @@
             if (isFirstLoad) {
                 const statusEl = document.getElementById('status');
                 statusEl.className = "status-message error";
+                statusEl.style.display = "block";
                 statusEl.textContent = "讀取失敗: " + error.message;
             } else {
-                // 自動刷新失敗時，默默記錄並在 5 秒後重試，不打擾使用者
                 console.log("自動背景刷新失敗: " + error.message);
                 setTimeout(fetchData, 5000);
             }
         }
     }
 
-    // 初始化獲取資料
-    async function init() {
-        // 註冊監聽器
-        document.getElementById('factory-select').addEventListener('change', handleFactoryChange);
-        document.getElementById('warehouse-select').addEventListener('change', handleWarehouseChange);
-        document.getElementById('category-select').addEventListener('change', handleCategoryChange);
-        document.getElementById('search-input').addEventListener('input', renderTable);
-        document.getElementById('btn-clear-all').addEventListener('click', clearAllFilters);
+    async function initApp() {
+        document.getElementById('btn-clear-all').onclick = clearAllFilters;
+        document.getElementById('btn-logout').onclick = handleLogout;
 
-        // 啟動資料下載
+        // 【關鍵修復】重新補回下拉選單與搜尋框的監聽事件，讓選擇條件時表格能即時更新
+        document.getElementById('factory-select').onchange = handleFactoryChange;
+        document.getElementById('warehouse-select').onchange = handleWarehouseChange;
+        document.getElementById('category-select').onchange = handleCategoryChange;
+        document.getElementById('search-input').oninput = renderTable;
+
         await fetchData();
     }
 
-    // 廠別切換邏輯
     function handleFactoryChange() {
         const factorySelect = document.getElementById('factory-select');
         const warehouseSelect = document.getElementById('warehouse-select');
@@ -772,14 +860,12 @@
 
         warehouseSelect.innerHTML = '';
 
-        // 建立選單選項
         const placeholderOpt = document.createElement('option');
         placeholderOpt.value = "";
         placeholderOpt.textContent = "-- 全部倉庫 --";
         warehouseSelect.appendChild(placeholderOpt);
 
         if (!selectedFactory) {
-            // 若不選廠別，倉庫選單列出一、二廠所有的倉庫 (依照一廠、二廠各自定義之順序呈現)
             const allWarehouses = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
             allWarehouses.forEach(wh => {
                 const option = document.createElement('option');
@@ -797,64 +883,43 @@
             });
         }
 
-        // 預設為全部倉庫
         warehouseSelect.value = "";
-
         localStorage.setItem('saved_factory', selectedFactory);
         localStorage.setItem('saved_warehouse', "");
-
         renderTable();
     }
 
-    // 倉庫切換邏輯
     function handleWarehouseChange() {
-        const warehouseValue = document.getElementById('warehouse-select').value;
-        localStorage.setItem('saved_warehouse', warehouseValue);
+        localStorage.setItem('saved_warehouse', document.getElementById('warehouse-select').value);
         renderTable();
     }
 
-    // 品類切換邏輯
     function handleCategoryChange() {
-        const categoryValue = document.getElementById('category-select').value;
-        localStorage.setItem('saved_category', categoryValue);
+        localStorage.setItem('saved_category', document.getElementById('category-select').value);
         renderTable();
     }
 
-    // 讀取 LocalStorage
     function loadSavedSettings() {
         const savedFactory = localStorage.getItem('saved_factory');
         const savedWarehouse = localStorage.getItem('saved_warehouse');
         const savedCategory = localStorage.getItem('saved_category');
 
-        // 1. 恢復廠別
-        if (savedFactory !== null) {
-            document.getElementById('factory-select').value = savedFactory;
-        }
-        
-        // 2. 初始化倉庫下拉
+        if (savedFactory !== null) document.getElementById('factory-select').value = savedFactory;
         handleFactoryChange();
-
-        // 3. 恢復倉庫
         if (savedWarehouse !== null && savedWarehouse !== "") {
             const warehouseSelect = document.getElementById('warehouse-select');
             if (Array.from(warehouseSelect.options).some(opt => opt.value === savedWarehouse)) {
                 warehouseSelect.value = savedWarehouse;
             }
         }
-
-        // 4. 恢復品類
-        if (savedCategory !== null) {
-            document.getElementById('category-select').value = savedCategory;
-        }
-
+        if (savedCategory !== null) document.getElementById('category-select').value = savedCategory;
+        
         renderTable();
     }
 
-    // 清空篩選
     function clearAllFilters() {
         document.getElementById('factory-select').value = "";
-        handleFactoryChange(); // 此處會自動重設倉庫選單
-
+        handleFactoryChange(); 
         document.getElementById('category-select').value = "ALL";
         document.getElementById('search-input').value = "";
 
@@ -865,42 +930,34 @@
         renderTable();
     }
 
-    // 安全轉換數值用函數
     function parseStockValue(val) {
         if (!val) return 0;
         return parseFloat(val.replace(/,/g, '')) || 0;
     }
 
-    // 渲染表格的核心邏輯
     function renderTable() {
         const activeFactory = document.getElementById('factory-select').value;
-        const activeWarehouse = document.getElementById('warehouse-select').value; // 空字串代表 "全部倉庫"
+        const activeWarehouse = document.getElementById('warehouse-select').value; 
         const activeCategory = document.getElementById('category-select').value;
         const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
         
         const tableBody = document.getElementById('table-body');
         const tableHeaderLast = document.querySelector('#table-header th:last-child');
         
-        const categoryKey = headers[colNameCategory];       // A 欄
-        const productCodeKey = headers[colNameProductCode]; // B 欄
-        const productNameKey = headers[colNameProductName]; // C 欄
-        const unitKey = headers[colNameUnit];               // D 欄
-        const warehouseKey = headers[colNameWarehouse];     // E 欄
-        const qtyKey = headers[colNameQty];                 // 數量欄
+        const categoryKey = headers[colNameCategory];
+        const productCodeKey = headers[colNameProductCode];
+        const productNameKey = headers[colNameProductName];
+        const unitKey = headers[colNameUnit];
+        const warehouseKey = headers[colNameWarehouse];
+        const qtyKey = headers[colNameQty];
 
         tableBody.innerHTML = '';
 
-        // 廠別跟倉庫選單有對應的完整倉庫範圍
         let allowedWHS = [];
-        if (activeFactory === "factory1") {
-            allowedWHS = factoryWarehouseMap.factory1;
-        } else if (activeFactory === "factory2") {
-            allowedWHS = factoryWarehouseMap.factory2;
-        } else {
-            allowedWHS = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
-        }
+        if (activeFactory === "factory1") allowedWHS = factoryWarehouseMap.factory1;
+        else if (activeFactory === "factory2") allowedWHS = factoryWarehouseMap.factory2;
+        else allowedWHS = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
 
-        // 如果廠別、倉庫、品類跟搜尋框皆為初始狀態（沒有指定特定查詢），則首頁預設空白
         const isDefaultState = (!activeFactory && !activeWarehouse && activeCategory === "ALL" && !searchQuery);
         if (isDefaultState) {
             tableHeaderLast.textContent = '當前庫存 / 其他倉庫';
@@ -910,27 +967,20 @@
 
         tableHeaderLast.textContent = `當前庫存 (${qtyKey}) / 其他倉明細`;
 
-        // 1. 篩選資料行
         let filteredRows = rawData;
 
-        // 篩選倉庫
         if (activeWarehouse) {
-            // 如果指定特定主倉庫，只載入該倉庫
             filteredRows = filteredRows.filter(item => item[warehouseKey] === activeWarehouse);
         } else {
-            // 如果是「全部倉庫」，僅載入符合當前所選廠別底下的倉庫資料
             filteredRows = filteredRows.filter(item => allowedWHS.includes(item[warehouseKey]));
         }
 
-        // 篩選品類
         if (activeCategory !== 'ALL') {
             filteredRows = filteredRows.filter(item => {
-                const itemCat = item[categoryKey] ? item[categoryKey].trim() : '';
-                return itemCat === activeCategory;
+                return (item[categoryKey] ? item[categoryKey].trim() : '') === activeCategory;
             });
         }
 
-        // 搜尋過濾
         if (searchQuery !== '') {
             filteredRows = filteredRows.filter(item => {
                 return (item[categoryKey] && item[categoryKey].toLowerCase().includes(searchQuery)) ||
@@ -941,14 +991,12 @@
             });
         }
 
-        // 2. 依據品類目錄規則進行排序 (保證原始列顯示依品類整齊排列)
         filteredRows.sort((a, b) => {
             const catA = a[categoryKey] ? a[categoryKey].trim() : '';
             const catB = b[categoryKey] ? b[categoryKey].trim() : '';
             return compareCategories(catA, catB);
         });
 
-        // 3. 逐列進行渲染並查找其他倉
         filteredRows.forEach(item => {
             const currentWhName = item[warehouseKey] || '';
             const productCode = item[productCodeKey] || '';
@@ -956,44 +1004,29 @@
             const unitValue = item[unitKey] || '';
             const mainStockValueRaw = item[qtyKey] || '0';
 
-            // 建立明細標籤容器
             let badgesGrid = document.createElement('div');
             badgesGrid.className = 'stock-badges-grid';
 
-            // 搜尋該項目在「其他所有倉庫」的庫存狀況 (精確對應：品項代號 B + 庫存單位 D 相同)
             let otherWhsWithStock = [];
             rawData.forEach(allItem => {
                 const isSameItem = (allItem[productCodeKey] === productCode) && (allItem[unitKey] === unitValue);
                 const isOtherWarehouse = (allItem[warehouseKey] !== currentWhName);
-                
                 if (isSameItem && isOtherWarehouse) {
                     const otherWhQtyStr = allItem[qtyKey] || '0';
-                    const otherWhQtyNum = parseStockValue(otherWhQtyStr);
-                    // 僅列出庫存大於 0 的倉庫
-                    if (otherWhQtyNum > 0) {
+                    if (parseStockValue(otherWhQtyStr) > 0) {
                         otherWhsWithStock.push({ name: allItem[warehouseKey], qty: otherWhQtyStr });
                     }
                 }
             });
 
-            // 對其他有庫存的倉庫進行排序 (一廠在前，二廠在後；同廠按指定順序)
             otherWhsWithStock.sort(compareWarehouses);
 
-            // 渲染其他倉標籤 (一廠用藍色標籤、二廠用綠色標籤)
             if (otherWhsWithStock.length > 0) {
                 otherWhsWithStock.forEach(wh => {
                     const pill = document.createElement('span');
-                    
-                    // 檢查是屬於一廠還是二廠的倉庫，並帶入對應樣式
                     const whInfo = whOrderMap[wh.name];
-                    const factory = whInfo ? whInfo.factory : 'factory1'; // 預設一廠
-
-                    if (factory === 'factory2') {
-                        pill.className = 'stock-badge-pill-f2'; // 二廠綠色
-                    } else {
-                        pill.className = 'stock-badge-pill-f1'; // 一廠藍色
-                    }
-                    
+                    const factory = whInfo ? whInfo.factory : 'factory1';
+                    pill.className = (factory === 'factory2') ? 'stock-badge-pill-f2' : 'stock-badge-pill-f1';
                     pill.textContent = `${wh.name}: ${wh.qty}`;
                     badgesGrid.appendChild(pill);
                 });
@@ -1006,7 +1039,6 @@
 
             const tr = document.createElement('tr');
 
-            // 品類
             const tdCat = document.createElement('td');
             tdCat.setAttribute('data-label', '品類');
             const spanCat = document.createElement('span');
@@ -1014,7 +1046,6 @@
             tdCat.appendChild(spanCat);
             tr.appendChild(tdCat);
 
-            // 品項代號
             const tdCode = document.createElement('td');
             tdCode.setAttribute('data-label', '品項代號');
             const spanCode = document.createElement('span');
@@ -1022,7 +1053,6 @@
             tdCode.appendChild(spanCode);
             tr.appendChild(tdCode);
 
-            // 品名
             const tdName = document.createElement('td');
             tdName.setAttribute('data-label', '品名');
             const spanName = document.createElement('span');
@@ -1031,7 +1061,6 @@
             tdName.appendChild(spanName);
             tr.appendChild(tdName);
 
-            // 庫存單位
             const tdUnit = document.createElement('td');
             tdUnit.setAttribute('data-label', '庫存單位');
             const spanUnit = document.createElement('span');
@@ -1039,7 +1068,6 @@
             tdUnit.appendChild(spanUnit);
             tr.appendChild(tdUnit);
 
-            // 新增獨立的「所屬倉庫」欄位 (排在第 5 格)
             const tdWh = document.createElement('td');
             tdWh.setAttribute('data-label', '所屬倉庫');
             const spanWh = document.createElement('span');
@@ -1047,15 +1075,12 @@
             tdWh.appendChild(spanWh);
             tr.appendChild(tdWh);
 
-            // 庫存與各倉明細 (排在第 6 格)
             const tdStock = document.createElement('td');
             tdStock.setAttribute('data-label', '當前庫存 / 其他倉庫');
             tdStock.style.textAlign = 'right';
 
             const stockContainer = document.createElement('div');
             stockContainer.className = 'stock-container';
-
-            // 主要顯示當前列對應之倉庫庫存
             const mainStockSpan = document.createElement('span');
             mainStockSpan.className = 'main-stock';
             mainStockSpan.textContent = mainStockValueRaw;
@@ -1074,7 +1099,8 @@
         }
     }
 
-    window.onload = init;
+    // 啟動身分驗證檢查
+    window.onload = checkAuth;
 </script>
 
 </body>
