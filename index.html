@@ -7,13 +7,15 @@
     <style>
         :root {
             --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
+            --accent-color: #2ecc71; /* 調整為更明亮活力的綠活品牌綠 */
+            --accent-blue: #3498db;
+            --bg-color: #f1fcf1; /* 關鍵修改：將原始的淡灰 #f8f9fa 改為更符合品牌形象的淡綠色 */
+            --card-bg: #ffffff; /* 保持卡片為純白，以獲得良好的對比 */
             --text-color: #2d3748;
             --border-color: #e2e8f0;
             --danger-color: #e53e3e;
             --danger-hover: #c53030;
+            --brand-green: #27ae60;
         }
 
         * {
@@ -24,7 +26,7 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-color); /* 應用淡綠色背景 */
             color: var(--text-color);
             padding: 20px 10px;
             display: flex;
@@ -34,7 +36,7 @@
         .container {
             width: 100%;
             max-width: 1200px;
-            background: var(--card-bg);
+            background: var(--card-bg); /* 卡片保持純白 */
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -44,13 +46,53 @@
             text-align: center;
             margin-bottom: 25px;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 15px;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* 關鍵修改：微調頁首漸層，使其與新的淡綠色背景無縫過渡 */
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.05) 0%, rgba(241, 252, 241, 0) 100%);
+            border-radius: 8px;
+        }
+
+        /* Logo 容器樣式 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .logo-main-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--brand-green);
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .logo-sub-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 3px;
         }
 
         h1 {
             color: var(--primary-color);
             font-size: 22px;
-            margin-bottom: 8px;
+            margin-top: 5px;
+            margin-bottom: 6px;
+            font-weight: 700;
         }
 
         .subtitle {
@@ -76,7 +118,7 @@
 
         #next-update-countdown {
             font-weight: 600;
-            color: var(--accent-color);
+            color: var(--brand-green);
         }
 
         .control-panel {
@@ -84,7 +126,8 @@
             grid-template-columns: 1fr;
             gap: 15px;
             margin-bottom: 25px;
-            background: #f7fafc;
+            /* 關鍵修改：將原始的淡藍色 #f7fafc 改為品牌內部的淡綠色，保持視覺一致性 */
+            background: #f0fff4;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -123,8 +166,8 @@
         }
 
         select:focus, input:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
         }
 
         .btn-clear {
@@ -263,7 +306,7 @@
         }
 
         .loading {
-            color: var(--accent-color);
+            color: var(--brand-green);
             font-weight: bold;
         }
 
@@ -374,9 +417,22 @@
 
 <div class="container">
     <header>
+        <div class="logo-container">
+            <svg width="46" height="46" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 85C50 85 25 65 25 45C25 25 45 20 50 35C55 20 75 25 75 45C75 65 50 85 50 85Z" fill="#2ecc71" opacity="0.15"/>
+                <path d="M50 80C50 80 30 62 30 45C30 30 45 27 50 38C55 27 70 30 70 45C70 62 50 80 50 80Z" fill="#27ae60" opacity="0.85"/>
+                <path d="M28 44C28 32 38 24 50 24C62 24 72 32 72 44C60 41 40 41 28 44Z" fill="#f39c12"/>
+                <path d="M47 43H53V72C53 74 51 75 49 75C47 75 47 74 47 72V43Z" fill="#f1c40f"/>
+                <circle cx="40" cy="32" r="3" fill="#ffffff" opacity="0.7"/>
+                <circle cx="60" cy="34" r="2.5" fill="#ffffff" opacity="0.7"/>
+            </svg>
+            <div class="logo-text">
+                <span class="logo-main-title">Green Living</span>
+                <span class="logo-sub-title">菇類大盤商 專業庫存</span>
+            </div>
+        </div>
         <h1>即時庫存查詢系統</h1>
         <div class="subtitle">資料來源：Google Sheets 雲端試算表</div>
-        <!-- 顯示刷新時間的全新資訊列 -->
         <div class="refresh-info" id="refresh-info-panel" style="display: none;">
             <span>數據刷新時間：<span id="last-update-time">載入中...</span></span>
             <span>(<span id="next-update-countdown">30</span> 秒後自動更新)</span>
@@ -386,7 +442,6 @@
     <div id="status" class="status-message loading">正在從 Google Sheets 載入最新庫存資料...</div>
 
     <div id="main-content" style="display: none;">
-        <!-- 四欄控制選單 -->
         <div class="control-panel">
             <div class="form-group">
                 <label for="factory-select">1. 選擇廠別：</label>
@@ -400,16 +455,14 @@
             <div class="form-group">
                 <label for="warehouse-select">2. 選擇主查詢倉庫：</label>
                 <select id="warehouse-select">
-                    <!-- 動態載入選單內容 -->
-                </select>
+                    </select>
             </div>
 
             <div class="form-group">
                 <label for="category-select">3. 選擇品類 (A欄)：</label>
                 <select id="category-select">
                     <option value="ALL">-- 全部品類 --</option>
-                    <!-- 動態載入品類選項 -->
-                </select>
+                    </select>
             </div>
 
             <div class="form-group">
@@ -418,7 +471,6 @@
             </div>
         </div>
 
-        <!-- 輔助按鈕：全部清空 -->
         <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
             <div style="width: 100%; max-width: 180px;">
                 <button type="button" id="btn-clear-all" class="btn-clear">
@@ -443,8 +495,7 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <!-- 動態產生表格內容 -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -989,7 +1040,7 @@
             tdUnit.appendChild(spanUnit);
             tr.appendChild(tdUnit);
 
-            // 關鍵修改：新增獨立的「所屬倉庫」欄位 (排在第 5 格)
+            // 新增獨立的「所屬倉庫」欄位 (排在第 5 格)
             const tdWh = document.createElement('td');
             tdWh.setAttribute('data-label', '所屬倉庫');
             const spanWh = document.createElement('span');
