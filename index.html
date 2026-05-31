@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>即時庫存查詢系統</title>
+    <title>倉庫庫存查詢系統</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -131,6 +131,7 @@
             overflow-x: auto;
             border: 1px solid var(--border-color);
             border-radius: 8px;
+            width: 100%;
         }
 
         table {
@@ -178,6 +179,7 @@
             flex-direction: column;
             align-items: flex-end;
             gap: 6px;
+            width: 100%;
         }
 
         .main-stock {
@@ -186,13 +188,14 @@
             color: #1a202c;
         }
 
-        /* 精緻庫存標籤網格 */
+        /* 精緻庫存標籤網格 - 防撐寬優化 */
         .stock-badges-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
             justify-content: flex-end;
             width: 100%;
+            max-width: 100%;
             margin-top: 2px;
         }
 
@@ -252,13 +255,24 @@
 
         /* 手機版 RWD 優化：寬度小於 768px 時轉換為卡片式排列 */
         @media (max-width: 767px) {
+            body {
+                padding: 10px 5px;
+            }
+
+            .container {
+                padding: 15px 12px;
+                border-radius: 8px;
+            }
+
             .table-container {
                 border: none;
+                overflow: hidden; /* 防止整個表格容器水平溢出 */
             }
             
             table {
                 display: block;
                 table-layout: auto;
+                width: 100%;
             }
 
             thead {
@@ -275,9 +289,10 @@
                 background: #ffffff;
                 border: 1px solid var(--border-color);
                 border-radius: 10px;
-                padding: 15px;
-                margin-bottom: 15px;
+                padding: 12px;
+                margin-bottom: 12px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+                width: 100%;
             }
 
             tr:nth-child(even) {
@@ -287,29 +302,37 @@
             td {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
+                align-items: flex-start; /* 頂部對齊，避免長內容錯位 */
                 padding: 10px 0;
                 border-bottom: 1px dashed #edf2f7;
                 width: 100% !important; /* 蓋掉電腦端的固定百分比 */
                 text-align: right;
                 font-size: 14px;
+                gap: 15px; /* 標籤和數值之間留出間距 */
             }
 
             td:last-child {
                 border-bottom: none;
                 padding-bottom: 0;
                 margin-top: 5px;
-                align-items: flex-start; /* 手機端庫存標籤向下排列對齊 */
             }
 
-            /* 動態注入標籤說明 */
+            /* 手機版動態注入標籤說明 (限制最大寬度防止撐開) */
             td::before {
                 content: attr(data-label);
                 font-weight: bold;
                 color: var(--primary-color);
                 text-align: left;
-                padding-right: 15px;
                 flex-shrink: 0;
+                width: 32%; /* 給予標題適當寬度 */
+            }
+
+            /* 手機卡片右側內容區域 */
+            td > span, td > div {
+                max-width: 65%; /* 限制右側內容最大寬度，強迫長品名或代號自動折行 */
+                text-align: right;
+                word-wrap: break-word;
+                word-break: break-all;
             }
 
             .stock-container {
@@ -320,6 +343,7 @@
             .stock-badges-grid {
                 justify-content: flex-end;
                 margin-top: 4px;
+                max-width: 100%; /* 防止標籤牆將右邊界擠出去 */
             }
         }
     </style>
@@ -850,26 +874,35 @@
             // 品類
             const tdCat = document.createElement('td');
             tdCat.setAttribute('data-label', '品類');
-            tdCat.textContent = item[categoryKey] || '-';
+            // 使用 span 包裹以便手機端控制最大寬度和自動折行
+            const spanCat = document.createElement('span');
+            spanCat.textContent = item[categoryKey] || '-';
+            tdCat.appendChild(spanCat);
             tr.appendChild(tdCat);
 
             // 品項代號
             const tdCode = document.createElement('td');
             tdCode.setAttribute('data-label', '品項代號');
-            tdCode.textContent = productCode || '-';
+            const spanCode = document.createElement('span');
+            spanCode.textContent = productCode || '-';
+            tdCode.appendChild(spanCode);
             tr.appendChild(tdCode);
 
             // 品名
             const tdName = document.createElement('td');
             tdName.setAttribute('data-label', '品名');
-            tdName.textContent = productName || '-';
-            tdName.style.fontWeight = '600';
+            const spanName = document.createElement('span');
+            spanName.textContent = productName || '-';
+            spanName.style.fontWeight = '600';
+            tdName.appendChild(spanName);
             tr.appendChild(tdName);
 
             // 庫存單位
             const tdUnit = document.createElement('td');
             tdUnit.setAttribute('data-label', '庫存單位');
-            tdUnit.textContent = unitValue || '-';
+            const spanUnit = document.createElement('span');
+            spanUnit.textContent = unitValue || '-';
+            tdUnit.appendChild(spanUnit);
             tr.appendChild(tdUnit);
 
             // 庫存與各倉明細
