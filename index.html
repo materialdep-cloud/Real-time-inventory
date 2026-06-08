@@ -604,7 +604,7 @@
     };
     const IDLE_TIMEOUT = 15 * 60 * 1000; // 15分鐘閒置超時自動登出（毫秒）
 
-    // 【新增】Google Apps Script 登入紀錄 API 網址 (請將剛剛複製的網址貼在引號內)
+    // Google Apps Script 登入紀錄 API 網址
     const LOG_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxAxZkK7U0UZIH-18IBz0VJP8vdkkigsOYcJ9nykdzQZGl-FKi4SIWd1tKrFUTTy95Z/exec"; 
 
     let rawData = [];
@@ -614,6 +614,9 @@
     let countdownInterval = null;
     let idleInterval = null; // 閒置偵測計時器
     
+    // 【關鍵暫存】預先儲存查詢到的使用者 IP 網域，解決登出清除暫存造成的讀取失敗問題
+    let userIpAddress = "未知網域"; 
+
     const colNameCategory = 0;
     const colNameProductCode = 1;
     const colNameProductName = 2;
@@ -659,11 +662,42 @@
 
     categoryTree.forEach((name, index) => { categoryOrderMap[name] = index; });
 
-    // 【新增】紀錄使用者行為的函數
-    function logUserAction(action) {
+    // 【全新升級：多備援 IP 查詢機制】頁面載入時背景即時、不阻塞獲取
+    async function fetchUserIP() {
+        const apis = [
+            'https://api.ipify.org?format=json',
+            'https://ipapi.co/json/',
+            'https://api.db-ip.com/v2/free/self'
+        ];
+        for (const url of apis) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒內未回傳即判定逾時，換下一組
+                
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    // 不同 API 回傳的欄位名稱不一，做全面相容性對應
+                    const ip = data.ip || data.query || data.origin || data.ipAddress;
+                    if (ip) {
+                        userIpAddress = ip;
+                        break; // 成功獲取，跳出循環
+                    }
+                }
+            } catch (e) {
+                console.log(`無法從 ${url} 取得 IP`, e);
+            }
+        }
+    }
+
+    // 紀錄使用者行為的函數 (使用已暫存的 IP 資訊，不需在非同步查詢上等待)
+    function logUserAction(action, accountOverride = null) {
         if (!LOG_WEB_APP_URL || LOG_WEB_APP_URL.includes("在此處貼上")) return;
         
-        const account = localStorage.getItem('gl_current_account') || '未知帳號';
+        // 優先使用覆寫傳入的帳號，防止暫存被提早清空
+        const account = accountOverride || localStorage.getItem('gl_current_account') || '未知帳號';
         let durationStr = "";
         
         if (action.includes('登出')) {
@@ -676,7 +710,7 @@
             localStorage.setItem('gl_login_timestamp', Date.now().toString());
         }
 
-        const url = `${LOG_WEB_APP_URL}?account=${encodeURIComponent(account)}&action=${encodeURIComponent(action)}&duration=${encodeURIComponent(durationStr)}`;
+        const url = `${LOG_WEB_APP_URL}?account=${encodeURIComponent(account)}&action=${encodeURIComponent(action)}&duration=${encodeURIComponent(durationStr)}&network=${encodeURIComponent(userIpAddress)}`;
         
         // 發送背景紀錄請求
         fetch(url, { mode: 'no-cors' }).catch(err => console.log('Log Error:', err));
@@ -687,7 +721,7 @@
         const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
         const now = Date.now();
         
-        // 【修復核心】如果發現已經超時，不允許重置時間，立刻強制登出
+        // 手機版背景復原時：如果發現已經超時，不允許重置時間，立刻強制登出
         if (lastActivity > 0 && (now - lastActivity >= IDLE_TIMEOUT)) {
             handleLogout(true);
             return;
@@ -711,7 +745,7 @@
             window.addEventListener(evt, resetIdleTime);
         });
         
-        // 【修復】手機版從背景切換回網頁時，立刻檢查是否已超時
+        // 手機版從背景切換回網頁時，立刻檢查是否已超時
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 checkIdleStatus();
@@ -832,7 +866,7 @@
                 localStorage.removeItem('gl_saved_account');
             }
 
-            logUserAction('登入'); // 【新增】發送登入紀錄
+            logUserAction('登入'); // 發送登入紀錄 (此時 IP 已在首頁背景加載完成)
             showApp();
         } else {
             errorMsg.textContent = "帳號或密碼錯誤，請重新輸入";
@@ -843,9 +877,10 @@
     }
 
     function handleLogout(isAuto = false) {
-        // 【新增】發送登出紀錄 (必須在清除 localStorage 前執行)
+        // 在清除暫存前，先把帳號取出，傳給行為紀錄函數
+        const currentAccount = localStorage.getItem('gl_current_account');
         if (localStorage.getItem('gl_auth_time')) {
-            logUserAction(isAuto ? '系統自動登出(閒置超時)' : '手動登出');
+            logUserAction(isAuto ? '系統自動登出(閒置超時)' : '手動登出', currentAccount);
         }
 
         localStorage.removeItem('gl_auth_time');
@@ -995,7 +1030,6 @@
         document.getElementById('btn-clear-all').onclick = clearAllFilters;
         document.getElementById('btn-logout').onclick = handleLogout;
 
-        // 【關鍵修復】重新補回下拉選單與搜尋框的監聽事件，讓選擇條件時表格能即時更新
         document.getElementById('factory-select').onchange = handleFactoryChange;
         document.getElementById('warehouse-select').onchange = handleWarehouseChange;
         document.getElementById('category-select').onchange = handleCategoryChange;
@@ -1250,8 +1284,15 @@
         }
     }
 
-    // 啟動身分驗證檢查
-    window.onload = checkAuth;
+    // 啟動身分驗證與預先載入 IP 流程
+    async function startApp() {
+        // 在背景非同步抓取 IP 並存入 userIpAddress 變數
+        fetchUserIP();
+        // 執行驗證檢查
+        checkAuth();
+    }
+
+    window.onload = startApp;
 </script>
 
 </body>
