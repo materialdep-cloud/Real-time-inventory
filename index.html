@@ -604,6 +604,9 @@
     };
     const IDLE_TIMEOUT = 15 * 60 * 1000; // 15分鐘閒置超時自動登出（毫秒）
 
+    // 【新增】Google Apps Script 登入紀錄 API 網址 (請將剛剛複製的網址貼在引號內)
+    const LOG_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxAxZkK7U0UZIH-18IBz0VJP8vdkkigsOYcJ9nykdzQZGl-FKi4SIWd1tKrFUTTy95Z/exec"; 
+
     let rawData = [];
     let headers = [];
     let isFirstLoad = true;
@@ -656,9 +659,41 @@
 
     categoryTree.forEach((name, index) => { categoryOrderMap[name] = index; });
 
+    // 【新增】紀錄使用者行為的函數
+    function logUserAction(action) {
+        if (!LOG_WEB_APP_URL || LOG_WEB_APP_URL.includes("在此處貼上")) return;
+        
+        const account = localStorage.getItem('gl_current_account') || '未知帳號';
+        let durationStr = "";
+        
+        if (action.includes('登出')) {
+            const loginTime = parseInt(localStorage.getItem('gl_login_timestamp') || '0');
+            if (loginTime > 0) {
+                const durationMins = Math.round((Date.now() - loginTime) / 60000);
+                durationStr = durationMins + " 分鐘";
+            }
+        } else if (action === '登入') {
+            localStorage.setItem('gl_login_timestamp', Date.now().toString());
+        }
+
+        const url = `${LOG_WEB_APP_URL}?account=${encodeURIComponent(account)}&action=${encodeURIComponent(action)}&duration=${encodeURIComponent(durationStr)}`;
+        
+        // 發送背景紀錄請求
+        fetch(url, { mode: 'no-cors' }).catch(err => console.log('Log Error:', err));
+    }
+
     // 重新計算閒置時間
     function resetIdleTime() {
-        localStorage.setItem('gl_last_activity', Date.now().toString());
+        const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
+        const now = Date.now();
+        
+        // 【修復核心】如果發現已經超時，不允許重置時間，立刻強制登出
+        if (lastActivity > 0 && (now - lastActivity >= IDLE_TIMEOUT)) {
+            handleLogout(true);
+            return;
+        }
+        
+        localStorage.setItem('gl_last_activity', now.toString());
     }
 
     // 檢查是否超時閒置
@@ -675,6 +710,15 @@
         ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
             window.addEventListener(evt, resetIdleTime);
         });
+        
+        // 【修復】手機版從背景切換回網頁時，立刻檢查是否已超時
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                checkIdleStatus();
+            }
+        });
+        window.addEventListener('focus', checkIdleStatus);
+
         resetIdleTime(); // 初始化時間
         if (idleInterval) clearInterval(idleInterval);
         idleInterval = setInterval(checkIdleStatus, 30000); // 每 30 秒檢查一次是否閒置超過 15 分鐘
@@ -779,6 +823,7 @@
         if (VALID_USERS[acc] && VALID_USERS[acc] === pwd) {
             errorMsg.style.display = 'none';
             localStorage.setItem('gl_auth_time', Date.now().toString());
+            localStorage.setItem('gl_current_account', acc); // 記錄當前登入帳號
             
             // 處理記住帳號邏輯
             if (rememberChk.checked) {
@@ -787,6 +832,7 @@
                 localStorage.removeItem('gl_saved_account');
             }
 
+            logUserAction('登入'); // 【新增】發送登入紀錄
             showApp();
         } else {
             errorMsg.textContent = "帳號或密碼錯誤，請重新輸入";
@@ -797,8 +843,16 @@
     }
 
     function handleLogout(isAuto = false) {
+        // 【新增】發送登出紀錄 (必須在清除 localStorage 前執行)
+        if (localStorage.getItem('gl_auth_time')) {
+            logUserAction(isAuto ? '系統自動登出(閒置超時)' : '手動登出');
+        }
+
         localStorage.removeItem('gl_auth_time');
         localStorage.removeItem('gl_last_activity');
+        localStorage.removeItem('gl_current_account');
+        localStorage.removeItem('gl_login_timestamp');
+
         if (countdownInterval) clearInterval(countdownInterval);
         if (idleInterval) clearInterval(idleInterval);
         
