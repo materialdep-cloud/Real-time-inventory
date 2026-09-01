@@ -7,9 +7,9 @@
     <style>
         :root {
             --primary-color: #2c3e50;
-            --accent-color: #2ecc71; /* 調整為更明亮活力的綠活品牌綠 */
+            --accent-color: #2ecc71;
             --accent-blue: #3498db;
-            --bg-color: #f1fcf1; /* 淡綠色背景 */
+            --bg-color: #f1fcf1;
             --card-bg: #ffffff;
             --text-color: #2d3748;
             --border-color: #e2e8f0;
@@ -35,7 +35,6 @@
             min-height: 100vh;
         }
 
-        /* 密碼驗證畫面 */
         #login-overlay {
             position: fixed;
             top: 0;
@@ -130,7 +129,6 @@
             font-weight: 600;
         }
 
-        /* 登出按鈕 */
         .logout-btn-container {
             display: flex;
             justify-content: flex-end;
@@ -182,7 +180,6 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.12);
         }
 
-        /* 主容器 */
         .container {
             width: 100%;
             max-width: 1200px;
@@ -206,7 +203,6 @@
             border-radius: 8px;
         }
 
-        /* Logo 容器樣式 */
         .logo-container {
             display: flex;
             align-items: center;
@@ -242,7 +238,6 @@
             font-size: 13px;
         }
 
-        /* 刷新資訊列樣式 */
         .refresh-info {
             font-size: 13px;
             color: #718096;
@@ -454,7 +449,6 @@
             border: 1px solid #fed7d7;
         }
 
-        /* 時間異常警示 Banner */
         .time-warning-banner {
             background-color: #fff5f5;
             color: #c53030;
@@ -491,7 +485,6 @@
 </head>
 <body>
 
-<!-- 密碼驗證鎖定畫面 -->
 <div id="login-overlay">
     <div class="login-card">
         <div class="login-logo">
@@ -532,7 +525,6 @@
     </div>
 </div>
 
-<!-- VPN 網域/IP 軟性卡控全螢幕鎖定畫面 -->
 <div id="vpn-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff5f5; z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: white; padding: 40px 30px; border-radius: 12px; border: 2px solid #feb2b2; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(229, 62, 62, 0.15);">
         <div style="margin-bottom: 20px; color: #e53e3e; display: flex; justify-content: center;">
@@ -556,7 +548,6 @@
     </div>
 </div>
 
-<!-- 主功能容器 -->
 <div class="container" id="app-container">
     <div class="logout-btn-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
         <a href="https://docs.google.com/spreadsheets/d/1M5wUKufssL8_UKzFfGGsjcF9DffPJimc1HJQD_EADME/edit?gid=322034433#gid=322034433" target="_blank" rel="noopener noreferrer" class="btn-sheets">
@@ -594,14 +585,12 @@
             <span>(<span id="next-update-countdown">30</span> 秒後自動更新)</span>
             <span id="sheet-update-info" style="display: none; margin-left: 6px;">| <span id="sheet-update-time" style="color: #d35400; font-weight: 600;">--</span></span>
         </div>
-        <!-- 異常警示視窗容器 -->
         <div id="time-warning-banner" class="time-warning-banner" style="display: none;"></div>
     </header>
 
     <div id="status" class="status-message loading" style="display: none;">正在從 Google Sheets 載入最新庫存資料...</div>
 
     <div id="main-content" style="display: none;">
-        <!-- 四欄控制選單 -->
         <div class="control-panel">
             <div class="form-group">
                 <label for="factory-select">1. 選擇廠別：</label>
@@ -615,7 +604,6 @@
             <div class="form-group">
                 <label for="warehouse-select">2. 選擇主查詢倉庫：</label>
                 <select id="warehouse-select">
-                    <!-- 動態載入選單內容 -->
                 </select>
             </div>
 
@@ -623,7 +611,6 @@
                 <label for="category-select">3. 選擇品類 (A欄)：</label>
                 <select id="category-select">
                     <option value="ALL">-- 全部品類 --</option>
-                    <!-- 動態載入品類選項 -->
                 </select>
             </div>
 
@@ -657,7 +644,6 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <!-- 動態產生表格內容 -->
                 </tbody>
             </table>
         </div>
@@ -667,12 +653,12 @@
 <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqhij3tYIKCP5YwznxO0uCrthJDE09xE8pOG76mejZDrH6xFyPRndBKnx9UBwQmnxxyvcE9vUUZJqk/pub?gid=322034433&single=true&output=csv";
     
-    // 允許的 VPN 出口 IP / 網域白名單 (可配置多組 IP)
-    const ALLOWED_VPN_IPS = [
-        "211.20.7.168"
-    ];
+    // GitHub Secret 動態注入機制
+    const RAW_SECRET_IPS = "__ALLOWED_VPN_IPS__";
+    const ALLOWED_VPN_IPS = (RAW_SECRET_IPS && !RAW_SECRET_IPS.startsWith("__"))
+        ? RAW_SECRET_IPS.split(",").map(ip => ip.trim()).filter(ip => ip.length > 0)
+        : [];
 
-    // 系統安全設定：帳號密碼對照表
     const VALID_USERS = {
         "0305": "830724",
         "0210": "860307",
@@ -680,9 +666,8 @@
         "0270": "700624",
         "0031": "10191019"
     };
-    const IDLE_TIMEOUT = 15 * 60 * 1000; // 15分鐘閒置超時自動登出（毫秒）
+    const IDLE_TIMEOUT = 15 * 60 * 1000;
 
-    // Google Apps Script 登入紀錄 API 網址
     const LOG_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxAxZkK7U0UZIH-18IBz0VJP8vdkkigsOYcJ9nykdzQZGl-FKi4SIWd1tKrFUTTy95Z/exec"; 
 
     let rawData = [];
@@ -690,9 +675,7 @@
     let isFirstLoad = true;
     let countdown = 30;
     let countdownInterval = null;
-    let idleInterval = null; // 閒置偵測計時器
-    
-    // 【關鍵暫存】預先儲存查詢到的使用者 IP 網域，解決登出清除暫存造成的讀取失敗問題
+    let idleInterval = null;
     let userIpAddress = "未知網域"; 
 
     const colNameCategory = 0;
@@ -740,7 +723,6 @@
 
     categoryTree.forEach((name, index) => { categoryOrderMap[name] = index; });
 
-    // 解析雲端試算表傳回的時間字串 (例如："2026/07/22 09:30:00" 或 "更新時間：2026-07-22 09:30")
     function parseSheetDateTime(text) {
         if (!text) return null;
         const match = text.match(/(\d{4})[-/\.](\d{1,2})[-/\.](\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
@@ -756,7 +738,6 @@
         return new Date(year, month, day, hours, minutes, seconds);
     }
 
-    // 【全新升級：多備援 IP 查詢機制】頁面載入時背景即時、不阻塞獲取
     async function fetchUserIP() {
         const apis = [
             'https://api.ipify.org?format=json',
@@ -766,18 +747,17 @@
         for (const url of apis) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒內未回傳即判定逾時，換下一組
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
                 
                 const res = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
                 
                 if (res.ok) {
                     const data = await res.json();
-                    // 不同 API 回傳的欄位名稱不一，做全面相容性對應
                     const ip = data.ip || data.query || data.origin || data.ipAddress;
                     if (ip) {
                         userIpAddress = ip.trim();
-                        break; // 成功獲取，跳出循環
+                        break;
                     }
                 }
             } catch (e) {
@@ -787,7 +767,6 @@
         return userIpAddress;
     }
 
-    // 執行 VPN 出口 IP / 網域軟性檢測
     async function validateVPN() {
         const detectedIpEl = document.getElementById('detected-ip-display');
         const vpnOverlay = document.getElementById('vpn-overlay');
@@ -800,7 +779,6 @@
             detectedIpEl.textContent = userIpAddress || '無法取得 IP';
         }
 
-        // 比對目前 IP 是否屬於白名單允許的 IP 或網域區段
         const isAllowed = ALLOWED_VPN_IPS.some(allowedIp => {
             return userIpAddress === allowedIp || userIpAddress.startsWith(allowedIp);
         });
@@ -814,11 +792,9 @@
         }
     }
 
-    // 紀錄使用者行為的函數 (使用已暫存的 IP 資訊，不需在非同步查詢上等待)
     function logUserAction(action, accountOverride = null) {
         if (!LOG_WEB_APP_URL || LOG_WEB_APP_URL.includes("在此處貼上")) return;
         
-        // 優先使用覆寫傳入的帳號，防止暫存被提早清空
         const account = accountOverride || localStorage.getItem('gl_current_account') || '未知帳號';
         let durationStr = "";
         
@@ -834,16 +810,13 @@
 
         const url = `${LOG_WEB_APP_URL}?account=${encodeURIComponent(account)}&action=${encodeURIComponent(action)}&duration=${encodeURIComponent(durationStr)}&network=${encodeURIComponent(userIpAddress)}`;
         
-        // 發送背景紀錄請求
         fetch(url, { mode: 'no-cors' }).catch(err => console.log('Log Error:', err));
     }
 
-    // 重新計算閒置時間
     function resetIdleTime() {
         const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
         const now = Date.now();
         
-        // 手機版背景復原時：如果發現已經超時，不允許重置時間，立刻強制登出
         if (lastActivity > 0 && (now - lastActivity >= IDLE_TIMEOUT)) {
             handleLogout(true);
             return;
@@ -852,22 +825,18 @@
         localStorage.setItem('gl_last_activity', now.toString());
     }
 
-    // 檢查是否超時閒置
     function checkIdleStatus() {
         const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
         if (lastActivity > 0 && Date.now() - lastActivity >= IDLE_TIMEOUT) {
-            handleLogout(true); // true 代表因超時而自動登出
+            handleLogout(true);
         }
     }
 
-    // 啟動閒置偵測機制
     function setupIdleTracking() {
-        // 監聽各種互動事件
         ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
             window.addEventListener(evt, resetIdleTime);
         });
         
-        // 手機版從背景切換回網頁時，立刻檢查是否已超時
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 checkIdleStatus();
@@ -875,9 +844,9 @@
         });
         window.addEventListener('focus', checkIdleStatus);
 
-        resetIdleTime(); // 初始化時間
+        resetIdleTime();
         if (idleInterval) clearInterval(idleInterval);
-        idleInterval = setInterval(checkIdleStatus, 30000); // 每 30 秒檢查一次是否閒置超過 15 分鐘
+        idleInterval = setInterval(checkIdleStatus, 30000);
     }
 
     function parseCSV(text) {
@@ -907,7 +876,6 @@
     function checkAuth() {
         const savedAuthTime = localStorage.getItem('gl_auth_time');
         
-        // 檢查是否曾經登入過，超時驗證現在改由閒置機制 (checkIdleStatus) 接管
         if (savedAuthTime) {
             showApp();
         } else {
@@ -920,7 +888,7 @@
         document.getElementById('app-container').style.display = 'block';
         document.getElementById('status').style.display = 'block';
         
-        setupIdleTracking(); // 成功登入後啟動閒置偵測
+        setupIdleTracking();
         initApp();
     }
 
@@ -932,7 +900,6 @@
         const pwdInput = document.getElementById('password-input');
         const rememberChk = document.getElementById('remember-account-chk');
         
-        // 讀取記住的帳號
         const savedAcc = localStorage.getItem('gl_saved_account');
         if (savedAcc) {
             accInput.value = savedAcc;
@@ -975,20 +942,18 @@
         const acc = accInput.value.trim();
         const pwd = pwdInput.value;
 
-        // 驗證帳號及對應的密碼
         if (VALID_USERS[acc] && VALID_USERS[acc] === pwd) {
             errorMsg.style.display = 'none';
             localStorage.setItem('gl_auth_time', Date.now().toString());
-            localStorage.setItem('gl_current_account', acc); // 記錄當前登入帳號
+            localStorage.setItem('gl_current_account', acc);
             
-            // 處理記住帳號邏輯
             if (rememberChk.checked) {
                 localStorage.setItem('gl_saved_account', acc);
             } else {
                 localStorage.removeItem('gl_saved_account');
             }
 
-            logUserAction('登入'); // 發送登入紀錄 (此時 IP 已在首頁背景加載完成)
+            logUserAction('登入');
             showApp();
         } else {
             errorMsg.textContent = "帳號或密碼錯誤，請重新輸入";
@@ -999,7 +964,6 @@
     }
 
     function handleLogout(isAuto = false) {
-        // 在清除暫存前，先把帳號取出，傳給行為紀錄函數
         const currentAccount = localStorage.getItem('gl_current_account');
         if (localStorage.getItem('gl_auth_time')) {
             logUserAction(isAuto ? '系統自動登出(閒置超時)' : '手動登出', currentAccount);
@@ -1013,7 +977,6 @@
         if (countdownInterval) clearInterval(countdownInterval);
         if (idleInterval) clearInterval(idleInterval);
         
-        // 移除監聽器避免重複堆疊
         ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
             window.removeEventListener(evt, resetIdleTime);
         });
@@ -1026,7 +989,6 @@
         
         showLogin();
         
-        // 如果是因超時自動登出，顯示提示訊息
         if (isAuto === true) {
             const errorMsg = document.getElementById('login-error-msg');
             errorMsg.textContent = "超過 15 分鐘未操作，為保護資料安全已自動登出。";
@@ -1110,7 +1072,6 @@
                     sheetTimeEl.textContent = sheetH1Text;
                     sheetInfoEl.style.display = 'inline';
 
-                    // 檢查雲端更新時間與當前時間相差是否超過 1 小時 (3,600,000 毫秒)
                     const parsedSheetTime = parseSheetDateTime(sheetH1Text);
                     if (parsedSheetTime) {
                         const now = new Date();
@@ -1447,9 +1408,7 @@
         }
     }
 
-    // 啟動身分驗證與預先載入 IP 流程
     async function startApp() {
-        // 設定重新檢測按鈕事件
         const btnRetry = document.getElementById('btn-retry-vpn');
         if (btnRetry) {
             btnRetry.onclick = async function() {
@@ -1460,7 +1419,6 @@
             };
         }
 
-        // 先執行 VPN IP 檢測
         const isVpnValid = await validateVPN();
         if (isVpnValid) {
             checkAuth();
