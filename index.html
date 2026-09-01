@@ -1,378 +1,1432 @@
-<style>
-:root {
---primary-color: #2c3e50;
-            --accent-color: #2ecc71; /* 調整為更明亮活力的綠活品牌綠 */
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>即時庫存查詢系統</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
             --accent-color: #2ecc71;
---accent-blue: #3498db;
-            --bg-color: #f1fcf1; /* 淡綠色背景 */
+            --accent-blue: #3498db;
             --bg-color: #f1fcf1;
---card-bg: #ffffff;
---text-color: #2d3748;
---border-color: #e2e8f0;
-@@ -35,7 +35,6 @@
-min-height: 100vh;
-}
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+            --danger-color: #e53e3e;
+            --danger-hover: #c53030;
+            --brand-green: #27ae60;
+        }
 
-        /* 密碼驗證畫面 */
-#login-overlay {
-position: fixed;
-top: 0;
-@@ -130,7 +129,6 @@
-font-weight: 600;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Microsoft JhengHei";
+        }
 
-        /* 登出按鈕 */
-.logout-btn-container {
-display: flex;
-justify-content: flex-end;
-@@ -182,7 +180,6 @@
-box-shadow: 0 3px 6px rgba(0,0,0,0.12);
-}
+        body {
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
 
-        /* 主容器 */
-.container {
-width: 100%;
-max-width: 1200px;
-@@ -206,7 +203,6 @@
-border-radius: 8px;
-}
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
 
-        /* Logo 容器樣式 */
-.logo-container {
-display: flex;
-align-items: center;
-@@ -242,7 +238,6 @@
-font-size: 13px;
-}
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
 
-        /* 刷新資訊列樣式 */
-.refresh-info {
-font-size: 13px;
-color: #718096;
-@@ -454,7 +449,6 @@
-border: 1px solid #fed7d7;
-}
+        .login-logo {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        /* 時間異常警示 Banner */
-.time-warning-banner {
-background-color: #fff5f5;
-color: #c53030;
-@@ -491,7 +485,6 @@
+        .login-input-group {
+            position: relative;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .login-input {
+            width: 100%;
+            height: 48px;
+            padding: 10px 45px 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-input:focus {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #718096;
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            background-color: var(--brand-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: #219653;
+        }
+
+        .login-error {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .logout-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: #718096;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background-color: #edf2f7;
+            color: var(--danger-color);
+            border-color: #fed7d7;
+        }
+
+        .btn-sheets {
+            background-color: #107c41;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .btn-sheets:hover {
+            background-color: #0b5c30;
+            color: white;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: none; 
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.05) 0%, rgba(241, 252, 241, 0) 100%);
+            border-radius: 8px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .logo-main-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--brand-green);
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 22px;
+            margin-top: 5px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .refresh-info {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #last-update-time {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        #next-update-countdown {
+            font-weight: 600;
+            color: var(--brand-green);
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f0fff4;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (min-width: 768px) {
+            .control-panel {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        select, input {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: var(--text-color);
+            width: 100%;
+            height: 44px;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
+        }
+
+        .btn-clear {
+            width: 100%;
+            height: 44px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-clear:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 15px;
+            table-layout: fixed;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 14px 16px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        th:nth-child(1), td:nth-child(1) { width: 12%; }
+        th:nth-child(2), td:nth-child(2) { width: 12%; }
+        th:nth-child(3), td:nth-child(3) { width: 23%; }
+        th:nth-child(4), td:nth-child(4) { width: 10%; }
+        th:nth-child(5), td:nth-child(5) { width: 16%; }
+        th:nth-child(6), td:nth-child(6) { width: 27%; }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+        }
+
+        .stock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .main-stock {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .stock-badges-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: flex-end;
+            width: 100%;
+            max-width: 100%;
+            margin-top: 2px;
+        }
+
+        .stock-badge-pill-f1 {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .stock-badge-pill-f2 {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #f0fff4;
+            color: #22543d;
+            border: 1px solid #c6f6d5;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .no-other-stock {
+            font-size: 11px;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #718096;
+        }
+
+        .loading {
+            color: var(--brand-green);
+            font-weight: bold;
+        }
+
+        .error {
+            color: #e53e3e;
+            background: #fff5f5;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #fed7d7;
+        }
+
+        .time-warning-banner {
+            background-color: #fff5f5;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(229, 62, 62, 0.12);
+        }
+
+        @media (max-width: 767px) {
+            body { padding: 10px 5px; }
+            .container { padding: 15px 12px; border-radius: 8px; }
+            .table-container { border: none; overflow: hidden; }
+            table { display: block; table-layout: auto; width: 100%; }
+            thead { display: none; }
+            tbody { display: block; width: 100%; }
+            tr { display: block; background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); width: 100%; }
+            tr:nth-child(even) { background-color: #ffffff; }
+            td { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed #edf2f7; width: 100% !important; text-align: right; font-size: 14px; gap: 15px; }
+            td:last-child { border-bottom: none; padding-bottom: 0; margin-top: 5px; }
+            td::before { content: attr(data-label); font-weight: bold; color: var(--primary-color); text-align: left; flex-shrink: 0; width: 32%; }
+            td > span, td > div { max-width: 65%; text-align: right; word-wrap: break-word; word-break: break-all; }
+            .stock-container { align-items: flex-end; width: 100%; }
+            .stock-badges-grid { justify-content: flex-end; margin-top: 4px; max-width: 100%; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- 密碼驗證鎖定畫面 -->
 <div id="login-overlay">
-<div class="login-card">
-<div class="login-logo">
-@@ -532,7 +525,6 @@
-</div>
+    <div class="login-card">
+        <div class="login-logo">
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 85C50 85 25 65 25 45C25 25 45 20 50 35C55 20 75 25 75 45C75 65 50 85 50 85Z" fill="#2ecc71" opacity="0.15"/>
+                <path d="M50 80C50 80 30 62 30 45C30 30 45 27 50 38C55 27 70 30 70 45C70 62 50 80 50 80Z" fill="#27ae60" opacity="0.85"/>
+                <path d="M28 44C28 32 38 24 50 24C62 24 72 32 72 44C60 41 40 41 28 44Z" fill="#f39c12"/>
+                <path d="M47 43H53V72C53 74 51 75 49 75C47 75 47 74 47 72V43Z" fill="#f1c40f"/>
+                <circle cx="40" cy="32" r="3" fill="#ffffff" opacity="0.7"/>
+                <circle cx="60" cy="34" r="2.5" fill="#ffffff" opacity="0.7"/>
+            </svg>
+            <span class="logo-main-title" style="margin-top: 10px;">Green Living</span>
+        </div>
+        <p style="margin-bottom: 25px; color: #718096; font-size: 14px;">此系統包含商業內部庫存機密，請登入以進行查詢</p>
+        
+        <div class="login-input-group">
+            <input type="text" id="account-input" class="login-input" placeholder="請輸入帳號..." autofocus>
+        </div>
+
+        <div class="login-input-group">
+            <input type="password" id="password-input" class="login-input" placeholder="請輸入登入密碼...">
+            <button class="toggle-password" id="btn-toggle-pwd" type="button" title="顯示/隱藏密碼">
+                <svg id="eye-icon" style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div style="text-align: left; margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #718096; font-weight: normal; font-size: 14px;">
+                <input type="checkbox" id="remember-account-chk" style="width: 16px; height: 16px; margin: 0; cursor: pointer;">
+                記住帳號
+            </label>
+        </div>
+
+        <button class="login-btn" id="btn-submit-pwd">確認驗證</button>
+        <div class="login-error" id="login-error-msg">帳號或密碼錯誤，請重新輸入</div>
+    </div>
 </div>
 
-<!-- VPN 網域/IP 軟性卡控全螢幕鎖定畫面 -->
 <div id="vpn-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff5f5; z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-<div style="background: white; padding: 40px 30px; border-radius: 12px; border: 2px solid #feb2b2; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(229, 62, 62, 0.15);">
-<div style="margin-bottom: 20px; color: #e53e3e; display: flex; justify-content: center;">
-@@ -556,7 +548,6 @@ <h2 style="color: #c53030; font-size: 22px; margin-bottom: 12px; font-weight: 70
-</div>
+    <div style="background: white; padding: 40px 30px; border-radius: 12px; border: 2px solid #feb2b2; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(229, 62, 62, 0.15);">
+        <div style="margin-bottom: 20px; color: #e53e3e; display: flex; justify-content: center;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5 0 .93-.5 1.73-1.25 2.16l1.09 3.26h-4.68l1.09-3.26C10 11.23 9.5 10.43 9.5 9.5 9.5 8.1 10.6 7 12 7z"/>
+            </svg>
+        </div>
+        <h2 style="color: #c53030; font-size: 22px; margin-bottom: 12px; font-weight: 700;">VPN / 特定網域安全防護卡控</h2>
+        <p style="color: #4a5568; font-size: 15px; margin-bottom: 15px; line-height: 1.6;">
+            本系統包含商業內部庫存機密，僅限透過綠原公司專用 VPN 或授權內部網域存取。<br>
+            偵測到您目前的對外 IP 為：<br>
+            <b id="detected-ip-display" style="color: #e53e3e; font-size: 18px; margin-top: 5px; display: inline-block;">檢測中...</b>
+        </p>
+        <div style="background: #edf2f7; padding: 12px 15px; border-radius: 6px; font-size: 13px; color: #4a5568; margin-bottom: 20px; text-align: left; border-left: 4px solid #e53e3e;">
+            📌 <b>存取權限說明：</b><br>
+            • 請先確認已連線至公司內部 VPN 網路。<br>
+        </div>
+        <button id="btn-retry-vpn" style="width: 100%; height: 46px; background-color: #e53e3e; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#c53030'" onmouseout="this.style.backgroundColor='#e53e3e'">
+            重新檢測 VPN 連線
+        </button>
+    </div>
 </div>
 
-<!-- 主功能容器 -->
 <div class="container" id="app-container">
-<div class="logout-btn-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-<a href="https://docs.google.com/spreadsheets/d/1M5wUKufssL8_UKzFfGGsjcF9DffPJimc1HJQD_EADME/edit?gid=322034433#gid=322034433" target="_blank" rel="noopener noreferrer" class="btn-sheets">
-@@ -594,14 +585,12 @@ <h1>即時庫存查詢系統</h1>
-<span>(<span id="next-update-countdown">30</span> 秒後自動更新)</span>
-<span id="sheet-update-info" style="display: none; margin-left: 6px;">| <span id="sheet-update-time" style="color: #d35400; font-weight: 600;">--</span></span>
-</div>
-        <!-- 異常警示視窗容器 -->
-<div id="time-warning-banner" class="time-warning-banner" style="display: none;"></div>
-</header>
+    <div class="logout-btn-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+        <a href="https://docs.google.com/spreadsheets/d/1M5wUKufssL8_UKzFfGGsjcF9DffPJimc1HJQD_EADME/edit?gid=322034433#gid=322034433" target="_blank" rel="noopener noreferrer" class="btn-sheets">
+            <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24">
+                <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19M10,7H14V9H10V7M10,11H14V13H10V11M10,15H14V17H10V15M6,7H8V9H6V7M6,11H8V13H6V11M6,15H8V17H6V15M16,7H18V9H16V7M16,11H18V13H16V11M16,15H18V17H16V15Z"/>
+            </svg>
+            開啟 Google Sheets 總表
+        </a>
+        <button class="btn-logout" id="btn-logout" type="button">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24">
+                <path d="M14.08 15.59L16.67 13H7V11H16.67L14.08 8.41L15.5 7L20.5 12L15.5 17L14.08 15.59M19 3A2 2 0 0 1 21 5V9.67L19 7.67V5H5V19H19V16.33L21 14.33V19A2 2 0 0 1 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H19Z"/>
+            </svg>
+            安全登出
+        </button>
+    </div>
 
-<div id="status" class="status-message loading" style="display: none;">正在從 Google Sheets 載入最新庫存資料...</div>
+    <header>
+        <div class="logo-container">
+            <svg width="46" height="46" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 85C50 85 25 65 25 45C25 25 45 20 50 35C55 20 75 25 75 45C75 65 50 85 50 85Z" fill="#2ecc71" opacity="0.15"/>
+                <path d="M50 80C50 80 30 62 30 45C30 30 45 27 50 38C55 27 70 30 70 45C70 62 50 80 50 80Z" fill="#27ae60" opacity="0.85"/>
+                <path d="M28 44C28 32 38 24 50 24C62 24 72 32 72 44C60 41 40 41 28 44Z" fill="#f39c12"/>
+                <path d="M47 43H53V72C53 74 51 75 49 75C47 75 47 74 47 72V43Z" fill="#f1c40f"/>
+                <circle cx="40" cy="32" r="3" fill="#ffffff" opacity="0.7"/>
+                <circle cx="60" cy="34" r="2.5" fill="#ffffff" opacity="0.7"/>
+            </svg>
+            <div class="logo-text">
+                <span class="logo-main-title">Green Living</span>
+            </div>
+        </div>
+        <h1>即時庫存查詢系統</h1>
+        <div class="subtitle">資料來源：Google Sheets 雲端試算表</div>
+        <div class="refresh-info" id="refresh-info-panel" style="display: none;">
+            <span>數據刷新時間：<span id="last-update-time">載入中...</span></span>
+            <span>(<span id="next-update-countdown">30</span> 秒後自動更新)</span>
+            <span id="sheet-update-info" style="display: none; margin-left: 6px;">| <span id="sheet-update-time" style="color: #d35400; font-weight: 600;">--</span></span>
+        </div>
+        <div id="time-warning-banner" class="time-warning-banner" style="display: none;"></div>
+    </header>
 
-<div id="main-content" style="display: none;">
-        <!-- 四欄控制選單 -->
-<div class="control-panel">
-<div class="form-group">
-<label for="factory-select">1. 選擇廠別：</label>
-@@ -615,15 +604,13 @@ <h1>即時庫存查詢系統</h1>
-<div class="form-group">
-<label for="warehouse-select">2. 選擇主查詢倉庫：</label>
-<select id="warehouse-select">
-                    <!-- 動態載入選單內容 -->
-</select>
+    <div id="status" class="status-message loading" style="display: none;">正在從 Google Sheets 載入最新庫存資料...</div>
+
+    <div id="main-content" style="display: none;">
+        <div class="control-panel">
+            <div class="form-group">
+                <label for="factory-select">1. 選擇廠別：</label>
+                <select id="factory-select">
+                    <option value="">-- 全部廠別 --</option>
+                    <option value="factory1">一廠</option>
+                    <option value="factory2">二廠</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="warehouse-select">2. 選擇主查詢倉庫：</label>
+                <select id="warehouse-select">
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="category-select">3. 選擇品類 (A欄)：</label>
+                <select id="category-select">
+                    <option value="ALL">-- 全部品類 --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="search-input">4. 關鍵字快速搜尋：</label>
+                <input type="text" id="search-input" placeholder="輸入代號、品名或單位搜尋...">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+            <div style="width: 100%; max-width: 180px;">
+                <button type="button" id="btn-clear-all" class="btn-clear">
+                    <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    全部清空
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="stock-table">
+                <thead>
+                    <tr id="table-header">
+                        <th>品類</th>
+                        <th>品項代號</th>
+                        <th>品名</th>
+                        <th>庫存單位</th>
+                        <th>所屬倉庫</th>
+                        <th style="text-align: right;">當前庫存 / 其他倉庫</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-<label for="category-select">3. 選擇品類 (A欄)：</label>
-<select id="category-select">
-<option value="ALL">-- 全部品類 --</option>
-                    <!-- 動態載入品類選項 -->
-</select>
-</div>
-
-@@ -657,7 +644,6 @@ <h1>即時庫存查詢系統</h1>
-</tr>
-</thead>
-<tbody id="table-body">
-                    <!-- 動態產生表格內容 -->
-</tbody>
-</table>
-</div>
-@@ -667,32 +653,29 @@ <h1>即時庫存查詢系統</h1>
 <script>
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqhij3tYIKCP5YwznxO0uCrthJDE09xE8pOG76mejZDrH6xFyPRndBKnx9UBwQmnxxyvcE9vUUZJqk/pub?gid=322034433&single=true&output=csv";
-
-    // 允許的 VPN 出口 IP / 網域白名單 (可配置多組 IP)
-    const ALLOWED_VPN_IPS = [
-        "211.20.7.168"
-    ];
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqhij3tYIKCP5YwznxO0uCrthJDE09xE8pOG76mejZDrH6xFyPRndBKnx9UBwQmnxxyvcE9vUUZJqk/pub?gid=322034433&single=true&output=csv";
+    
     // GitHub Secret 動態注入機制
     const RAW_SECRET_IPS = "__ALLOWED_VPN_IPS__";
     const ALLOWED_VPN_IPS = (RAW_SECRET_IPS && !RAW_SECRET_IPS.startsWith("__"))
         ? RAW_SECRET_IPS.split(",").map(ip => ip.trim()).filter(ip => ip.length > 0)
-        : [];
+        : ["211.20.7.168"];
 
-    // 系統安全設定：帳號密碼對照表
-const VALID_USERS = {
-"0305": "830724",
-"0210": "860307",
-"0379": "791212",
-"0270": "700624",
-"0031": "10191019"
-};
-    const IDLE_TIMEOUT = 15 * 60 * 1000; // 15分鐘閒置超時自動登出（毫秒）
+    const VALID_USERS = {
+        "0305": "830724",
+        "0210": "860307",
+        "0379": "791212",
+        "0270": "700624",
+        "0031": "10191019"
+    };
     const IDLE_TIMEOUT = 15 * 60 * 1000;
 
-    // Google Apps Script 登入紀錄 API 網址
-const LOG_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxAxZkK7U0UZIH-18IBz0VJP8vdkkigsOYcJ9nykdzQZGl-FKi4SIWd1tKrFUTTy95Z/exec"; 
+    const LOG_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxAxZkK7U0UZIH-18IBz0VJP8vdkkigsOYcJ9nykdzQZGl-FKi4SIWd1tKrFUTTy95Z/exec"; 
 
-let rawData = [];
-let headers = [];
-let isFirstLoad = true;
-let countdown = 30;
-let countdownInterval = null;
-    let idleInterval = null; // 閒置偵測計時器
-    
-    // 【關鍵暫存】預先儲存查詢到的使用者 IP 網域，解決登出清除暫存造成的讀取失敗問題
+    let rawData = [];
+    let headers = [];
+    let isFirstLoad = true;
+    let countdown = 30;
+    let countdownInterval = null;
     let idleInterval = null;
-let userIpAddress = "未知網域"; 
+    let userIpAddress = "未知網域"; 
 
-const colNameCategory = 0;
-@@ -740,7 +723,6 @@ <h1>即時庫存查詢系統</h1>
+    const colNameCategory = 0;
+    const colNameProductCode = 1;
+    const colNameProductName = 2;
+    const colNameUnit = 3;
+    const colNameWarehouse = 4;
+    let colNameQty = -1;
 
-categoryTree.forEach((name, index) => { categoryOrderMap[name] = index; });
+    const factoryWarehouseMap = {
+        factory1: [
+            "63-7倉",
+            "63-6倉/上層",
+            "63-5倉/常溫料架區",
+            "車棚1倉/包材倉",
+            "車棚2倉/久儲包材倉",
+            "63-5倉/低溫倉",
+            "63-6倉/下層/理貨倉"
+        ],
+        factory2: [
+            "綠園二廠/總倉",
+            "綠園二廠/包材倉",
+            "綠園二廠/待處理倉",
+            "綠園二廠/常溫區",
+            "包裝/原料倉",
+            "包裝/成品倉",
+            "包裝/成品二倉"
+        ]
+    };
 
-    // 解析雲端試算表傳回的時間字串 (例如："2026/07/22 09:30:00" 或 "更新時間：2026-07-22 09:30")
-function parseSheetDateTime(text) {
-if (!text) return null;
-const match = text.match(/(\d{4})[-/\.](\d{1,2})[-/\.](\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
-@@ -756,7 +738,6 @@ <h1>即時庫存查詢系統</h1>
-return new Date(year, month, day, hours, minutes, seconds);
-}
+    const whOrderMap = {};
+    factoryWarehouseMap.factory1.forEach((name, index) => { whOrderMap[name] = { factory: 'factory1', score: index }; });
+    factoryWarehouseMap.factory2.forEach((name, index) => { whOrderMap[name] = { factory: 'factory2', score: index }; });
 
-    // 【全新升級：多備援 IP 查詢機制】頁面載入時背景即時、不阻塞獲取
-async function fetchUserIP() {
-const apis = [
-'https://api.ipify.org?format=json',
-@@ -766,18 +747,17 @@ <h1>即時庫存查詢系統</h1>
-for (const url of apis) {
-try {
-const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒內未回傳即判定逾時，換下一組
+    const categoryOrderMap = {};
+    const categoryTree = [
+        "菇類", "香菇", "杏鮑菇", "木耳", "銀耳", "金針", "鴻喜雪白", "秀珍", "洋菇", "雜菇", "綜合菇", "乾香菇",
+        "蔬菜類", "芽菜", "瓜菜", "根菜", "莖菜", "葉菜", "包葉菜", "花菜", "果菜", "豆菜", "生菜",
+        "雜糧特用類", "雜糧特用", "水果類", "水果",
+        "其他農產類", "花草", "蜂類", "藻類", "堅果類",
+        "截切加工", "截切", "加工品", "樣品", "跨類綜合", "代收付產品",
+        "雜項", "收入", "折讓", "製造費用", "營業費用", "其他支出",
+        "包材", "貼紙", "包裝托盤/盒", "包裝袋", "保鮮膜", "袋膜", "紙箱", "袖套", "套印", "其他", "物流籃", "棧板"
+    ];
+
+    categoryTree.forEach((name, index) => { categoryOrderMap[name] = index; });
+
+    function parseSheetDateTime(text) {
+        if (!text) return null;
+        const match = text.match(/(\d{4})[-/\.](\d{1,2})[-/\.](\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+        if (!match) return null;
+        
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const hours = match[4] !== undefined ? parseInt(match[4], 10) : 0;
+        const minutes = match[5] !== undefined ? parseInt(match[5], 10) : 0;
+        const seconds = match[6] !== undefined ? parseInt(match[6], 10) : 0;
+        
+        return new Date(year, month, day, hours, minutes, seconds);
+    }
+
+    async function fetchUserIP() {
+        const apis = [
+            'https://api.ipify.org?format=json',
+            'https://ipapi.co/json/',
+            'https://api.db-ip.com/v2/free/self'
+        ];
+        for (const url of apis) {
+            try {
+                const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-const res = await fetch(url, { signal: controller.signal });
-clearTimeout(timeoutId);
-
-if (res.ok) {
-const data = await res.json();
-                    // 不同 API 回傳的欄位名稱不一，做全面相容性對應
-const ip = data.ip || data.query || data.origin || data.ipAddress;
-if (ip) {
-userIpAddress = ip.trim();
-                        break; // 成功獲取，跳出循環
+                
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const ip = data.ip || data.query || data.origin || data.ipAddress;
+                    if (ip) {
+                        userIpAddress = ip.trim();
                         break;
-}
-}
-} catch (e) {
-@@ -787,7 +767,6 @@ <h1>即時庫存查詢系統</h1>
-return userIpAddress;
-}
+                    }
+                }
+            } catch (e) {
+                console.log(`無法從 ${url} 取得 IP`, e);
+            }
+        }
+        return userIpAddress;
+    }
 
-    // 執行 VPN 出口 IP / 網域軟性檢測
-async function validateVPN() {
-const detectedIpEl = document.getElementById('detected-ip-display');
-const vpnOverlay = document.getElementById('vpn-overlay');
-@@ -800,7 +779,6 @@ <h1>即時庫存查詢系統</h1>
-detectedIpEl.textContent = userIpAddress || '無法取得 IP';
-}
+    async function validateVPN() {
+        const detectedIpEl = document.getElementById('detected-ip-display');
+        const vpnOverlay = document.getElementById('vpn-overlay');
+        
+        if (detectedIpEl) detectedIpEl.textContent = '檢測中...';
 
-        // 比對目前 IP 是否屬於白名單允許的 IP 或網域區段
-const isAllowed = ALLOWED_VPN_IPS.some(allowedIp => {
-return userIpAddress === allowedIp || userIpAddress.startsWith(allowedIp);
-});
-@@ -814,11 +792,9 @@ <h1>即時庫存查詢系統</h1>
-}
-}
+        await fetchUserIP();
 
-    // 紀錄使用者行為的函數 (使用已暫存的 IP 資訊，不需在非同步查詢上等待)
-function logUserAction(action, accountOverride = null) {
-if (!LOG_WEB_APP_URL || LOG_WEB_APP_URL.includes("在此處貼上")) return;
+        if (detectedIpEl) {
+            detectedIpEl.textContent = userIpAddress || '無法取得 IP';
+        }
 
-        // 優先使用覆寫傳入的帳號，防止暫存被提早清空
-const account = accountOverride || localStorage.getItem('gl_current_account') || '未知帳號';
-let durationStr = "";
+        const isAllowed = ALLOWED_VPN_IPS.some(allowedIp => {
+            return userIpAddress === allowedIp || userIpAddress.startsWith(allowedIp);
+        });
 
-@@ -834,16 +810,13 @@ <h1>即時庫存查詢系統</h1>
+        if (!isAllowed) {
+            vpnOverlay.style.display = 'flex';
+            return false;
+        } else {
+            vpnOverlay.style.display = 'none';
+            return true;
+        }
+    }
 
-const url = `${LOG_WEB_APP_URL}?account=${encodeURIComponent(account)}&action=${encodeURIComponent(action)}&duration=${encodeURIComponent(durationStr)}&network=${encodeURIComponent(userIpAddress)}`;
+    function logUserAction(action, accountOverride = null) {
+        if (!LOG_WEB_APP_URL || LOG_WEB_APP_URL.includes("在此處貼上")) return;
+        
+        const account = accountOverride || localStorage.getItem('gl_current_account') || '未知帳號';
+        let durationStr = "";
+        
+        if (action.includes('登出')) {
+            const loginTime = parseInt(localStorage.getItem('gl_login_timestamp') || '0');
+            if (loginTime > 0) {
+                const durationMins = Math.round((Date.now() - loginTime) / 60000);
+                durationStr = durationMins + " 分鐘";
+            }
+        } else if (action === '登入') {
+            localStorage.setItem('gl_login_timestamp', Date.now().toString());
+        }
 
-        // 發送背景紀錄請求
-fetch(url, { mode: 'no-cors' }).catch(err => console.log('Log Error:', err));
-}
+        const url = `${LOG_WEB_APP_URL}?account=${encodeURIComponent(account)}&action=${encodeURIComponent(action)}&duration=${encodeURIComponent(durationStr)}&network=${encodeURIComponent(userIpAddress)}`;
+        
+        fetch(url, { mode: 'no-cors' }).catch(err => console.log('Log Error:', err));
+    }
 
-    // 重新計算閒置時間
-function resetIdleTime() {
-const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
-const now = Date.now();
-
-        // 手機版背景復原時：如果發現已經超時，不允許重置時間，立刻強制登出
-if (lastActivity > 0 && (now - lastActivity >= IDLE_TIMEOUT)) {
-handleLogout(true);
-return;
-@@ -852,32 +825,28 @@ <h1>即時庫存查詢系統</h1>
-localStorage.setItem('gl_last_activity', now.toString());
-}
-
-    // 檢查是否超時閒置
-function checkIdleStatus() {
-const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
-if (lastActivity > 0 && Date.now() - lastActivity >= IDLE_TIMEOUT) {
-            handleLogout(true); // true 代表因超時而自動登出
+    function resetIdleTime() {
+        const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
+        const now = Date.now();
+        
+        if (lastActivity > 0 && (now - lastActivity >= IDLE_TIMEOUT)) {
             handleLogout(true);
-}
-}
+            return;
+        }
+        
+        localStorage.setItem('gl_last_activity', now.toString());
+    }
 
-    // 啟動閒置偵測機制
-function setupIdleTracking() {
-        // 監聽各種互動事件
-['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
-window.addEventListener(evt, resetIdleTime);
-});
+    function checkIdleStatus() {
+        const lastActivity = parseInt(localStorage.getItem('gl_last_activity') || '0');
+        if (lastActivity > 0 && Date.now() - lastActivity >= IDLE_TIMEOUT) {
+            handleLogout(true);
+        }
+    }
 
-        // 手機版從背景切換回網頁時，立刻檢查是否已超時
-document.addEventListener('visibilitychange', () => {
-if (document.visibilityState === 'visible') {
-checkIdleStatus();
-}
-});
-window.addEventListener('focus', checkIdleStatus);
+    function setupIdleTracking() {
+        ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, resetIdleTime);
+        });
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                checkIdleStatus();
+            }
+        });
+        window.addEventListener('focus', checkIdleStatus);
 
-        resetIdleTime(); // 初始化時間
         resetIdleTime();
-if (idleInterval) clearInterval(idleInterval);
-        idleInterval = setInterval(checkIdleStatus, 30000); // 每 30 秒檢查一次是否閒置超過 15 分鐘
+        if (idleInterval) clearInterval(idleInterval);
         idleInterval = setInterval(checkIdleStatus, 30000);
-}
+    }
 
-function parseCSV(text) {
-@@ -907,7 +876,6 @@ <h1>即時庫存查詢系統</h1>
-function checkAuth() {
-const savedAuthTime = localStorage.getItem('gl_auth_time');
+    function parseCSV(text) {
+        let lines = [];
+        let row = [""];
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+            let c = text[i];
+            let next = text[i+1];
+            if (c === '"') {
+                if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+                else { inQuotes = !inQuotes; }
+            } else if (c === ',' && !inQuotes) {
+                row.push('');
+            } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                if (c === '\r' && next === '\n') { i++; }
+                lines.push(row);
+                row = [''];
+            } else {
+                row[row.length - 1] += c;
+            }
+        }
+        if (row.length > 1 || row[0] !== '') { lines.push(row); }
+        return lines;
+    }
 
-        // 檢查是否曾經登入過，超時驗證現在改由閒置機制 (checkIdleStatus) 接管
-if (savedAuthTime) {
-showApp();
-} else {
-@@ -920,7 +888,7 @@ <h1>即時庫存查詢系統</h1>
-document.getElementById('app-container').style.display = 'block';
-document.getElementById('status').style.display = 'block';
+    function checkAuth() {
+        const savedAuthTime = localStorage.getItem('gl_auth_time');
+        
+        if (savedAuthTime) {
+            showApp();
+        } else {
+            showLogin();
+        }
+    }
 
-        setupIdleTracking(); // 成功登入後啟動閒置偵測
+    function showApp() {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        document.getElementById('status').style.display = 'block';
+        
         setupIdleTracking();
-initApp();
-}
+        initApp();
+    }
 
-@@ -932,7 +900,6 @@ <h1>即時庫存查詢系統</h1>
-const pwdInput = document.getElementById('password-input');
-const rememberChk = document.getElementById('remember-account-chk');
+    function showLogin() {
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+        
+        const accInput = document.getElementById('account-input');
+        const pwdInput = document.getElementById('password-input');
+        const rememberChk = document.getElementById('remember-account-chk');
+        
+        const savedAcc = localStorage.getItem('gl_saved_account');
+        if (savedAcc) {
+            accInput.value = savedAcc;
+            rememberChk.checked = true;
+            pwdInput.focus();
+        } else {
+            accInput.value = '';
+            rememberChk.checked = false;
+            accInput.focus();
+        }
+        
+        pwdInput.value = '';
 
-        // 讀取記住的帳號
-const savedAcc = localStorage.getItem('gl_saved_account');
-if (savedAcc) {
-accInput.value = savedAcc;
-@@ -975,20 +942,18 @@ <h1>即時庫存查詢系統</h1>
-const acc = accInput.value.trim();
-const pwd = pwdInput.value;
+        document.getElementById('btn-submit-pwd').onclick = validatePassword;
+        pwdInput.onkeydown = function(e) {
+            if (e.key === 'Enter') validatePassword();
+        };
+        accInput.onkeydown = function(e) {
+            if (e.key === 'Enter') pwdInput.focus();
+        };
 
-        // 驗證帳號及對應的密碼
-if (VALID_USERS[acc] && VALID_USERS[acc] === pwd) {
-errorMsg.style.display = 'none';
-localStorage.setItem('gl_auth_time', Date.now().toString());
-            localStorage.setItem('gl_current_account', acc); // 記錄當前登入帳號
+        document.getElementById('btn-toggle-pwd').onclick = function() {
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === "password") {
+                pwdInput.type = "text";
+                eyeIcon.innerHTML = `<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.82l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.74-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.17C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.07 21 20.5 19.57 3.43 2.83 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.1-3.21l1.91 1.91C13.13 8.18 12.59 8 12 8c-2.21 0-4 1.79-4 4 0 .59.18 1.13.5 1.54l1.91 1.91c.05-.14.09-.3.09-.45 0-1.1.9-2 2-2 .15 0 .31.04.45.09z"/>`;
+            } else {
+                pwdInput.type = "password";
+                eyeIcon.innerHTML = `<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>`;
+            }
+        };
+    }
+
+    function validatePassword() {
+        const accInput = document.getElementById('account-input');
+        const pwdInput = document.getElementById('password-input');
+        const errorMsg = document.getElementById('login-error-msg');
+        const rememberChk = document.getElementById('remember-account-chk');
+        
+        const acc = accInput.value.trim();
+        const pwd = pwdInput.value;
+
+        if (VALID_USERS[acc] && VALID_USERS[acc] === pwd) {
+            errorMsg.style.display = 'none';
+            localStorage.setItem('gl_auth_time', Date.now().toString());
             localStorage.setItem('gl_current_account', acc);
+            
+            if (rememberChk.checked) {
+                localStorage.setItem('gl_saved_account', acc);
+            } else {
+                localStorage.removeItem('gl_saved_account');
+            }
 
-            // 處理記住帳號邏輯
-if (rememberChk.checked) {
-localStorage.setItem('gl_saved_account', acc);
-} else {
-localStorage.removeItem('gl_saved_account');
-}
-
-            logUserAction('登入'); // 發送登入紀錄 (此時 IP 已在首頁背景加載完成)
             logUserAction('登入');
-showApp();
-} else {
-errorMsg.textContent = "帳號或密碼錯誤，請重新輸入";
-@@ -999,7 +964,6 @@ <h1>即時庫存查詢系統</h1>
-}
+            showApp();
+        } else {
+            errorMsg.textContent = "帳號或密碼錯誤，請重新輸入";
+            errorMsg.style.display = 'block';
+            pwdInput.value = '';
+            pwdInput.focus();
+        }
+    }
 
-function handleLogout(isAuto = false) {
-        // 在清除暫存前，先把帳號取出，傳給行為紀錄函數
-const currentAccount = localStorage.getItem('gl_current_account');
-if (localStorage.getItem('gl_auth_time')) {
-logUserAction(isAuto ? '系統自動登出(閒置超時)' : '手動登出', currentAccount);
-@@ -1013,7 +977,6 @@ <h1>即時庫存查詢系統</h1>
-if (countdownInterval) clearInterval(countdownInterval);
-if (idleInterval) clearInterval(idleInterval);
+    function handleLogout(isAuto = false) {
+        const currentAccount = localStorage.getItem('gl_current_account');
+        if (localStorage.getItem('gl_auth_time')) {
+            logUserAction(isAuto ? '系統自動登出(閒置超時)' : '手動登出', currentAccount);
+        }
 
-        // 移除監聽器避免重複堆疊
-['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
-window.removeEventListener(evt, resetIdleTime);
-});
-@@ -1026,7 +989,6 @@ <h1>即時庫存查詢系統</h1>
+        localStorage.removeItem('gl_auth_time');
+        localStorage.removeItem('gl_last_activity');
+        localStorage.removeItem('gl_current_account');
+        localStorage.removeItem('gl_login_timestamp');
 
-showLogin();
+        if (countdownInterval) clearInterval(countdownInterval);
+        if (idleInterval) clearInterval(idleInterval);
+        
+        ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+            window.removeEventListener(evt, resetIdleTime);
+        });
 
-        // 如果是因超時自動登出，顯示提示訊息
-if (isAuto === true) {
-const errorMsg = document.getElementById('login-error-msg');
-errorMsg.textContent = "超過 15 分鐘未操作，為保護資料安全已自動登出。";
-@@ -1110,7 +1072,6 @@ <h1>即時庫存查詢系統</h1>
-sheetTimeEl.textContent = sheetH1Text;
-sheetInfoEl.style.display = 'inline';
+        isFirstLoad = true;
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('refresh-info-panel').style.display = 'none';
+        document.getElementById('category-select').innerHTML = '<option value="ALL">-- 全部品類 --</option>';
+        
+        showLogin();
+        
+        if (isAuto === true) {
+            const errorMsg = document.getElementById('login-error-msg');
+            errorMsg.textContent = "超過 15 分鐘未操作，為保護資料安全已自動登出。";
+            errorMsg.style.display = 'block';
+        }
+    }
 
-                    // 檢查雲端更新時間與當前時間相差是否超過 1 小時 (3,600,000 毫秒)
-const parsedSheetTime = parseSheetDateTime(sheetH1Text);
-if (parsedSheetTime) {
-const now = new Date();
-@@ -1447,9 +1408,7 @@ <h1>即時庫存查詢系統</h1>
-}
-}
+    function compareCategories(a, b) {
+        const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
+        const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.localeCompare(b, 'zh-Hant');
+    }
 
-    // 啟動身分驗證與預先載入 IP 流程
-async function startApp() {
-        // 設定重新檢測按鈕事件
-const btnRetry = document.getElementById('btn-retry-vpn');
-if (btnRetry) {
-btnRetry.onclick = async function() {
-@@ -1460,7 +1419,6 @@ <h1>即時庫存查詢系統</h1>
-};
-}
+    function compareWarehouses(a, b) {
+        const infoA = whOrderMap[a.name];
+        const infoB = whOrderMap[b.name];
+        const fA = infoA ? infoA.factory : 'unknown';
+        const fB = infoB ? infoB.factory : 'unknown';
 
-        // 先執行 VPN IP 檢測
-const isVpnValid = await validateVPN();
-if (isVpnValid) {
-checkAuth();
+        if (fA !== fB) {
+            if (fA === 'factory1') return -1;
+            if (fB === 'factory1') return 1;
+            if (fA === 'factory2') return -1;
+            if (fB === 'factory2') return 1;
+        }
+        const scoreA = infoA ? infoA.score : 999;
+        const scoreB = infoB ? infoB.score : 999;
+        return scoreA - scoreB;
+    }
+
+    function updateLastUpdatedTime() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('last-update-time').textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    }
+
+    function startCountdown() {
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdown = 30;
+        document.getElementById('next-update-countdown').textContent = countdown;
+        countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                fetchData(); 
+            } else {
+                document.getElementById('next-update-countdown').textContent = countdown;
+            }
+        }, 1000);
+    }
+
+    async function fetchData() {
+        try {
+            const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error("無法讀取雲端資料，請確認連結是否正確且已公開發布。");
+            const dataText = await response.text();
+            
+            const rows = parseCSV(dataText);
+            if (rows.length < 2) throw new Error("試算表內沒有足夠的資料。");
+
+            let sheetH1Text = "";
+            if (rows[0] && rows[0].length > 7 && rows[0][7]) {
+                sheetH1Text = rows[0][7].trim();
+            } else if (rows[0]) {
+                const foundCell = rows[0].find(cell => cell.includes("更新時間"));
+                if (foundCell) sheetH1Text = foundCell.trim();
+            }
+
+            if (sheetH1Text) {
+                const sheetTimeEl = document.getElementById('sheet-update-time');
+                const sheetInfoEl = document.getElementById('sheet-update-info');
+                const warningBanner = document.getElementById('time-warning-banner');
+
+                if (sheetTimeEl && sheetInfoEl) {
+                    sheetTimeEl.textContent = sheetH1Text;
+                    sheetInfoEl.style.display = 'inline';
+
+                    const parsedSheetTime = parseSheetDateTime(sheetH1Text);
+                    if (parsedSheetTime) {
+                        const now = new Date();
+                        const diffMs = Math.abs(now.getTime() - parsedSheetTime.getTime());
+                        const ONE_HOUR_MS = 60 * 60 * 1000;
+
+                        if (diffMs > ONE_HOUR_MS) {
+                            const diffHours = (diffMs / (1000 * 60 * 60)).toFixed(1);
+                            if (warningBanner) {
+                                warningBanner.innerHTML = `⚠️ <b>【數據異動異常提醒】</b> 雲端試算表更新時間與目前系統時間相差超過 1 小時（相差約 ${diffHours} 小時），資料可能非最新！`;
+                                warningBanner.style.display = 'flex';
+                            }
+                            sheetTimeEl.style.color = '#e53e3e';
+                            sheetTimeEl.style.fontWeight = 'bold';
+                        } else {
+                            if (warningBanner) warningBanner.style.display = 'none';
+                            sheetTimeEl.style.color = '#d35400';
+                            sheetTimeEl.style.fontWeight = '600';
+                        }
+                    }
+                }
+            }
+
+            headers = rows[0].map(h => h.trim());
+            for (let i = 0; i < headers.length; i++) {
+                if (/(數量|庫存|存量|現存|結存|盤點|qty|stock|amount)/i.test(headers[i]) && i > colNameWarehouse) {
+                    colNameQty = i;
+                    break;
+                }
+            }
+            if (colNameQty === -1) colNameQty = headers.length - 1;
+
+            rawData = rows.slice(1).filter(r => r.length === headers.length && r.some(cell => cell !== '')).map(r => {
+                let obj = {};
+                headers.forEach((h, i) => { obj[h] = r[i] ? r[i].trim() : ''; });
+                return obj;
+            });
+
+            if (isFirstLoad) {
+                const categories = new Set();
+                rawData.forEach(item => { if (item[headers[colNameCategory]]) categories.add(item[headers[colNameCategory]].trim()); });
+                const sortedCategories = Array.from(categories).sort(compareCategories);
+
+                const catSelect = document.getElementById('category-select');
+                sortedCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    catSelect.appendChild(option);
+                });
+
+                document.getElementById('status').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('refresh-info-panel').style.display = 'flex';
+
+                loadSavedSettings();
+                isFirstLoad = false;
+            } else {
+                renderTable();
+            }
+
+            updateLastUpdatedTime();
+            startCountdown();
+
+        } catch (error) {
+            console.error(error);
+            if (isFirstLoad) {
+                const statusEl = document.getElementById('status');
+                statusEl.className = "status-message error";
+                statusEl.style.display = "block";
+                statusEl.textContent = "讀取失敗: " + error.message;
+            } else {
+                console.log("自動背景刷新失敗: " + error.message);
+                setTimeout(fetchData, 5000);
+            }
+        }
+    }
+
+    async function initApp() {
+        document.getElementById('btn-clear-all').onclick = clearAllFilters;
+        document.getElementById('btn-logout').onclick = handleLogout;
+
+        document.getElementById('factory-select').onchange = handleFactoryChange;
+        document.getElementById('warehouse-select').onchange = handleWarehouseChange;
+        document.getElementById('category-select').onchange = handleCategoryChange;
+        document.getElementById('search-input').oninput = renderTable;
+
+        await fetchData();
+    }
+
+    function handleFactoryChange() {
+        const factorySelect = document.getElementById('factory-select');
+        const warehouseSelect = document.getElementById('warehouse-select');
+        const selectedFactory = factorySelect.value;
+
+        warehouseSelect.innerHTML = '';
+
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = "";
+        placeholderOpt.textContent = "-- 全部倉庫 --";
+        warehouseSelect.appendChild(placeholderOpt);
+
+        if (!selectedFactory) {
+            const allWarehouses = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
+            allWarehouses.forEach(wh => {
+                const option = document.createElement('option');
+                option.value = wh;
+                option.textContent = wh;
+                warehouseSelect.appendChild(option);
+            });
+        } else {
+            const targetWarehouses = factoryWarehouseMap[selectedFactory] || [];
+            targetWarehouses.forEach(wh => {
+                const option = document.createElement('option');
+                option.value = wh;
+                option.textContent = wh;
+                warehouseSelect.appendChild(option);
+            });
+        }
+
+        warehouseSelect.value = "";
+        localStorage.setItem('saved_factory', selectedFactory);
+        localStorage.setItem('saved_warehouse', "");
+        renderTable();
+    }
+
+    function handleWarehouseChange() {
+        localStorage.setItem('saved_warehouse', document.getElementById('warehouse-select').value);
+        renderTable();
+    }
+
+    function handleCategoryChange() {
+        localStorage.setItem('saved_category', document.getElementById('category-select').value);
+        renderTable();
+    }
+
+    function loadSavedSettings() {
+        const savedFactory = localStorage.getItem('saved_factory');
+        const savedWarehouse = localStorage.getItem('saved_warehouse');
+        const savedCategory = localStorage.getItem('saved_category');
+
+        if (savedFactory !== null) document.getElementById('factory-select').value = savedFactory;
+        handleFactoryChange();
+        if (savedWarehouse !== null && savedWarehouse !== "") {
+            const warehouseSelect = document.getElementById('warehouse-select');
+            if (Array.from(warehouseSelect.options).some(opt => opt.value === savedWarehouse)) {
+                warehouseSelect.value = savedWarehouse;
+            }
+        }
+        if (savedCategory !== null) document.getElementById('category-select').value = savedCategory;
+        
+        renderTable();
+    }
+
+    function clearAllFilters() {
+        document.getElementById('factory-select').value = "";
+        handleFactoryChange(); 
+        document.getElementById('category-select').value = "ALL";
+        document.getElementById('search-input').value = "";
+
+        localStorage.removeItem('saved_factory');
+        localStorage.removeItem('saved_warehouse');
+        localStorage.removeItem('saved_category');
+
+        renderTable();
+    }
+
+    function parseStockValue(val) {
+        if (!val) return 0;
+        return parseFloat(val.replace(/,/g, '')) || 0;
+    }
+
+    function renderTable() {
+        const activeFactory = document.getElementById('factory-select').value;
+        const activeWarehouse = document.getElementById('warehouse-select').value; 
+        const activeCategory = document.getElementById('category-select').value;
+        const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+        
+        const tableBody = document.getElementById('table-body');
+        const tableHeaderLast = document.querySelector('#table-header th:last-child');
+        
+        const categoryKey = headers[colNameCategory];
+        const productCodeKey = headers[colNameProductCode];
+        const productNameKey = headers[colNameProductName];
+        const unitKey = headers[colNameUnit];
+        const warehouseKey = headers[colNameWarehouse];
+        const qtyKey = headers[colNameQty];
+
+        tableBody.innerHTML = '';
+
+        let allowedWHS = [];
+        if (activeFactory === "factory1") allowedWHS = factoryWarehouseMap.factory1;
+        else if (activeFactory === "factory2") allowedWHS = factoryWarehouseMap.factory2;
+        else allowedWHS = [...factoryWarehouseMap.factory1, ...factoryWarehouseMap.factory2];
+
+        const isDefaultState = (!activeFactory && !activeWarehouse && activeCategory === "ALL" && !searchQuery);
+        if (isDefaultState) {
+            tableHeaderLast.textContent = '當前庫存 / 其他倉庫';
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#a0aec0; padding:50px; font-size:16px;">請先選擇廠別、倉庫或指定品類以載入庫存資料</td></tr>`;
+            return;
+        }
+
+        tableHeaderLast.textContent = `當前庫存 (${qtyKey}) / 其他倉明細`;
+
+        let filteredRows = rawData;
+
+        if (activeWarehouse) {
+            filteredRows = filteredRows.filter(item => item[warehouseKey] === activeWarehouse);
+        } else {
+            filteredRows = filteredRows.filter(item => allowedWHS.includes(item[warehouseKey]));
+        }
+
+        if (activeCategory !== 'ALL') {
+            filteredRows = filteredRows.filter(item => {
+                return (item[categoryKey] ? item[categoryKey].trim() : '') === activeCategory;
+            });
+        }
+
+        if (searchQuery !== '') {
+            filteredRows = filteredRows.filter(item => {
+                return (item[categoryKey] && item[categoryKey].toLowerCase().includes(searchQuery)) ||
+                       (item[productCodeKey] && item[productCodeKey].toLowerCase().includes(searchQuery)) ||
+                       (item[productNameKey] && item[productNameKey].toLowerCase().includes(searchQuery)) ||
+                       (item[unitKey] && item[unitKey].toLowerCase().includes(searchQuery)) ||
+                       (item[warehouseKey] && item[warehouseKey].toLowerCase().includes(searchQuery));
+            });
+        }
+
+        filteredRows.sort((a, b) => {
+            const catA = a[categoryKey] ? a[categoryKey].trim() : '';
+            const catB = b[categoryKey] ? b[categoryKey].trim() : '';
+            return compareCategories(catA, catB);
+        });
+
+        filteredRows.forEach(item => {
+            const currentWhName = item[warehouseKey] || '';
+            const productCode = item[productCodeKey] || '';
+            const productName = item[productNameKey] || '';
+            const unitValue = item[unitKey] || '';
+            const mainStockValueRaw = item[qtyKey] || '0';
+
+            let badgesGrid = document.createElement('div');
+            badgesGrid.className = 'stock-badges-grid';
+
+            let otherWhsWithStock = [];
+            rawData.forEach(allItem => {
+                const isSameItem = (allItem[productCodeKey] === productCode) && (allItem[unitKey] === unitValue);
+                const isOtherWarehouse = (allItem[warehouseKey] !== currentWhName);
+                if (isSameItem && isOtherWarehouse) {
+                    const otherWhQtyStr = allItem[qtyKey] || '0';
+                    if (parseStockValue(otherWhQtyStr) > 0) {
+                        otherWhsWithStock.push({ name: allItem[warehouseKey], qty: otherWhQtyStr });
+                    }
+                }
+            });
+
+            otherWhsWithStock.sort(compareWarehouses);
+
+            if (otherWhsWithStock.length > 0) {
+                otherWhsWithStock.forEach(wh => {
+                    const pill = document.createElement('span');
+                    const whInfo = whOrderMap[wh.name];
+                    const factory = whInfo ? whInfo.factory : 'factory1';
+                    pill.className = (factory === 'factory2') ? 'stock-badge-pill-f2' : 'stock-badge-pill-f1';
+                    pill.textContent = `${wh.name}: ${wh.qty}`;
+                    badgesGrid.appendChild(pill);
+                });
+            } else {
+                const noStock = document.createElement('span');
+                noStock.className = 'no-other-stock';
+                noStock.textContent = '(其他倉無此品項)';
+                badgesGrid.appendChild(noStock);
+            }
+
+            const tr = document.createElement('tr');
+
+            const tdCat = document.createElement('td');
+            tdCat.setAttribute('data-label', '品類');
+            const spanCat = document.createElement('span');
+            spanCat.textContent = item[categoryKey] || '-';
+            tdCat.appendChild(spanCat);
+            tr.appendChild(tdCat);
+
+            const tdCode = document.createElement('td');
+            tdCode.setAttribute('data-label', '品項代號');
+            const spanCode = document.createElement('span');
+            spanCode.textContent = productCode || '-';
+            tdCode.appendChild(spanCode);
+            tr.appendChild(tdCode);
+
+            const tdName = document.createElement('td');
+            tdName.setAttribute('data-label', '品名');
+            const spanName = document.createElement('span');
+            spanName.textContent = productName || '-';
+            spanName.style.fontWeight = '600';
+            tdName.appendChild(spanName);
+            tr.appendChild(tdName);
+
+            const tdUnit = document.createElement('td');
+            tdUnit.setAttribute('data-label', '庫存單位');
+            const spanUnit = document.createElement('span');
+            spanUnit.textContent = unitValue || '-';
+            tdUnit.appendChild(spanUnit);
+            tr.appendChild(tdUnit);
+
+            const tdWh = document.createElement('td');
+            tdWh.setAttribute('data-label', '所屬倉庫');
+            const spanWh = document.createElement('span');
+            spanWh.textContent = currentWhName || '-';
+            tdWh.appendChild(spanWh);
+            tr.appendChild(tdWh);
+
+            const tdStock = document.createElement('td');
+            tdStock.setAttribute('data-label', '當前庫存 / 其他倉庫');
+            tdStock.style.textAlign = 'right';
+
+            const stockContainer = document.createElement('div');
+            stockContainer.className = 'stock-container';
+            const mainStockSpan = document.createElement('span');
+            mainStockSpan.className = 'main-stock';
+            mainStockSpan.textContent = mainStockValueRaw;
+
+            stockContainer.appendChild(mainStockSpan);
+            stockContainer.appendChild(badgesGrid);
+
+            tdStock.appendChild(stockContainer);
+            tr.appendChild(tdStock);
+
+            tableBody.appendChild(tr);
+        });
+
+        if (filteredRows.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#a0aec0; padding:30px;">沒有找到符合搜尋條件的品項</td></tr>`;
+        }
+    }
+
+    async function startApp() {
+        const btnRetry = document.getElementById('btn-retry-vpn');
+        if (btnRetry) {
+            btnRetry.onclick = async function() {
+                const isValid = await validateVPN();
+                if (isValid) {
+                    checkAuth();
+                }
+            };
+        }
+
+        const isVpnValid = await validateVPN();
+        if (isVpnValid) {
+            checkAuth();
+        }
+    }
+
+    window.onload = startApp;
+</script>
+
+</body>
+</html>
